@@ -1,0 +1,49 @@
+spring:
+  datasource:
+    url: jdbc:mysql://127.0.0.1:3307/db_chatonline?serverTimezone=GMT%2b8&useUnicode=true&characterEncoding=utf8
+    username: root
+    password: 
+    driver-class-name: com.mysql.jdbc.Driver
+    hikari:
+      maximum-pool-size: 5
+      connection-timeout: 30000
+      idle-timeout: 1800000
+      max-lifetime: 1800000
+
+  jpa:
+    show-sql: true
+    hibernate:
+      ddl-auto: update
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.MySQL5InnoDBDialect
+        format_sql: true
+
+  devtools:
+    restart:
+      enabled: false
+
+# ============= 添加所有必需的配置属性 =============
+ylrc:
+  upload:
+    photo:
+      sufix: .jpg,.png,.gif,.jpeg
+      maxsize: 1024
+      path: /tmp/upload/photo/
+    file:
+      maxsize: 102400
+      path: /tmp/upload/file/
+  database:
+    backup:
+      dir: /tmp/backup/
+      username: testuser
+      password: testpass
+      database.name: test_db
+
+# 日志配置
+logging:
+  level:
+    root: INFO
+    org:
+      hibernate: WARN
+      springframework: WARN

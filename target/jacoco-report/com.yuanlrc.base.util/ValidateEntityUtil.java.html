@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="zh"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>ValidateEntityUtil.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">chatonline</a> &gt; <a href="index.source.html" class="el_package">com.yuanlrc.base.util</a> &gt; <span class="el_source">ValidateEntityUtil.java</span></div><h1>ValidateEntityUtil.java</h1><pre class="source lang-java linenums">package com.yuanlrc.base.util;
+
+import java.lang.reflect.Field;
+
+import com.yuanlrc.base.annotion.ValidateEntity;
+import com.yuanlrc.base.bean.CodeMsg;
+
+/**
+ * 验证实体工具类
+ * @author Administrator
+ *
+ */
+<span class="nc" id="L13">public class ValidateEntityUtil {</span>
+	
+	public static CodeMsg validate(Object object){
+<span class="nc" id="L16">		Field[] declaredFields = object.getClass().getDeclaredFields();</span>
+<span class="nc bnc" id="L17" title="All 2 branches missed.">		for(Field field : declaredFields){</span>
+<span class="nc" id="L18">			ValidateEntity annotation = field.getAnnotation(ValidateEntity.class);</span>
+<span class="nc bnc" id="L19" title="All 2 branches missed.">			if(annotation != null){</span>
+<span class="nc bnc" id="L20" title="All 2 branches missed.">				if(annotation.required()){</span>
+					//表示该字段是必填字段
+<span class="nc" id="L22">					field.setAccessible(true);</span>
+					try {
+<span class="nc" id="L24">						Object o = field.get(object);</span>
+						//首先判断是否为空
+<span class="nc bnc" id="L26" title="All 2 branches missed.">						if(o == null){</span>
+<span class="nc" id="L27">							CodeMsg codeMsg = CodeMsg.VALIDATE_ENTITY_ERROR;</span>
+<span class="nc" id="L28">							codeMsg.setMsg(annotation.errorRequiredMsg());</span>
+<span class="nc" id="L29">							return codeMsg;</span>
+						}
+						//到这，说明该变量的值不是null
+						//首先判断是不是String类型
+<span class="nc bnc" id="L33" title="All 2 branches missed.">						if(o instanceof String){</span>
+							//若是字符串类型，则检查其长度
+<span class="nc bnc" id="L35" title="All 2 branches missed.">							if(annotation.requiredLeng()){</span>
+<span class="nc bnc" id="L36" title="All 2 branches missed.">								if(o.toString().length() &lt; annotation.minLength()){</span>
+<span class="nc" id="L37">									CodeMsg codeMsg = CodeMsg.VALIDATE_ENTITY_ERROR;</span>
+<span class="nc" id="L38">									codeMsg.setMsg(annotation.errorMinLengthMsg());</span>
+<span class="nc" id="L39">									return codeMsg;</span>
+								}
+<span class="nc bnc" id="L41" title="All 2 branches missed.">								if(o.toString().length() &gt; annotation.maxLength()){</span>
+<span class="nc" id="L42">									CodeMsg codeMsg = CodeMsg.VALIDATE_ENTITY_ERROR;</span>
+<span class="nc" id="L43">									codeMsg.setMsg(annotation.errorMaxLengthMsg());</span>
+<span class="nc" id="L44">									return codeMsg;</span>
+								}
+							}
+						}
+						//其次来判断是否为数字
+<span class="nc bnc" id="L49" title="All 2 branches missed.">						if(isNumberObject(o)){</span>
+							//判断是否规定检查最小值
+<span class="nc bnc" id="L51" title="All 2 branches missed.">							if(annotation.requiredMinValue()){</span>
+<span class="nc bnc" id="L52" title="All 2 branches missed.">								if(Double.valueOf(o.toString()) &lt; annotation.minValue()){</span>
+<span class="nc" id="L53">									CodeMsg codeMsg = CodeMsg.VALIDATE_ENTITY_ERROR;</span>
+<span class="nc" id="L54">									codeMsg.setMsg(annotation.errorMinValueMsg());</span>
+<span class="nc" id="L55">									return codeMsg;</span>
+								}
+							}
+							//判断是否规定检查最大值
+<span class="nc bnc" id="L59" title="All 2 branches missed.">							if(annotation.requiredMaxValue()){</span>
+<span class="nc bnc" id="L60" title="All 2 branches missed.">								if(Double.valueOf(o.toString()) &gt; annotation.maxValue()){</span>
+<span class="nc" id="L61">									CodeMsg codeMsg = CodeMsg.VALIDATE_ENTITY_ERROR;</span>
+<span class="nc" id="L62">									codeMsg.setMsg(annotation.errorMaxValueMsg());</span>
+<span class="nc" id="L63">									return codeMsg;</span>
+								}
+							}
+						}
+<span class="nc" id="L67">					} catch (IllegalArgumentException e) {</span>
+						// TODO Auto-generated catch block
+<span class="nc" id="L69">						e.printStackTrace();</span>
+<span class="nc" id="L70">					} catch (IllegalAccessException e) {</span>
+						// TODO Auto-generated catch block
+<span class="nc" id="L72">						e.printStackTrace();</span>
+<span class="nc" id="L73">					}</span>
+				}
+			}
+		}
+<span class="nc" id="L77">		return CodeMsg.SUCCESS;</span>
+	}
+	
+	/**
+	 * 检查对象是否是数字类型
+	 * @param object
+	 * @return
+	 */
+	public static boolean isNumberObject(Object object){
+<span class="nc bnc" id="L86" title="All 2 branches missed.">		if(object instanceof Integer)return true;</span>
+<span class="nc bnc" id="L87" title="All 2 branches missed.">		if(object instanceof Long)return true;</span>
+<span class="nc bnc" id="L88" title="All 2 branches missed.">		if(object instanceof Float)return true;</span>
+<span class="nc bnc" id="L89" title="All 2 branches missed.">		if(object instanceof Double)return true;</span>
+<span class="nc" id="L90">		return false;</span>
+	}
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.10.202304240956</span></div></body></html>

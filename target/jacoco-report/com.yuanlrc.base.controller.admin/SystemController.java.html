@@ -1,0 +1,334 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="zh"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>SystemController.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">chatonline</a> &gt; <a href="index.source.html" class="el_package">com.yuanlrc.base.controller.admin</a> &gt; <span class="el_source">SystemController.java</span></div><h1>SystemController.java</h1><pre class="source lang-java linenums">package com.yuanlrc.base.controller.admin;
+
+
+import java.util.Date;
+
+import javax.servlet.http.HttpServletRequest;
+
+import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
+
+import com.yuanlrc.base.bean.CodeMsg;
+import com.yuanlrc.base.bean.PageBean;
+import com.yuanlrc.base.bean.Result;
+import com.yuanlrc.base.config.AppConfig;
+import com.yuanlrc.base.constant.SessionConstant;
+import com.yuanlrc.base.entity.admin.OperaterLog;
+import com.yuanlrc.base.entity.admin.OrderAuth;
+import com.yuanlrc.base.entity.admin.Role;
+import com.yuanlrc.base.entity.admin.User;
+import com.yuanlrc.base.server.home.WebSocket;
+import com.yuanlrc.base.service.admin.DatabaseBakService;
+import com.yuanlrc.base.service.admin.OperaterLogService;
+import com.yuanlrc.base.service.admin.OrderAuthService;
+import com.yuanlrc.base.service.admin.UserService;
+import com.yuanlrc.base.service.common.AccountGroupService;
+import com.yuanlrc.base.service.common.AccountService;
+import com.yuanlrc.base.service.common.MsgContentService;
+import com.yuanlrc.base.service.common.MsgLogService;
+import com.yuanlrc.base.util.SessionUtil;
+import com.yuanlrc.base.util.StringUtil;
+import com.yuanlrc.base.util.ValidateEntityUtil;
+
+/**
+ * 系统控制器
+ * @author Administrator
+ *
+ */
+@RequestMapping(&quot;/system&quot;)
+@Controller
+<span class="nc" id="L49">public class SystemController {</span>
+
+	@Autowired
+	private OrderAuthService orderAuthService;
+	
+	@Autowired
+	private OperaterLogService operaterLogService;
+	
+	@Autowired
+	private UserService userService;
+	
+	@Autowired
+	private DatabaseBakService databaseBakService;
+	
+	@Autowired
+	private AccountService accountService;
+	
+	@Autowired
+	private AccountGroupService accountGroupService;
+	
+	@Autowired
+	private MsgContentService msgContentService;
+	
+	@Autowired
+	private MsgLogService msgLogService;
+	@Value(&quot;${show.tips.text}&quot;)
+	private String showTipsText;
+	@Value(&quot;${show.tips.url.text}&quot;)
+	private String showTipsUrlText;
+	@Value(&quot;${show.tips.btn.text}&quot;)
+	private String showTipsBtnText;
+	@Value(&quot;${show.tips.url}&quot;)
+	private String showTipsUtl;
+<span class="nc" id="L82">	private Logger log = LoggerFactory.getLogger(SystemController.class);</span>
+	
+	/**
+	 * 登录页面
+	 * @param name
+	 * @param model
+	 * @return
+	 */
+	@RequestMapping(value=&quot;/login&quot;,method=RequestMethod.GET)
+	public String login(Model model){
+<span class="nc" id="L92">		return &quot;admin/system/login&quot;;</span>
+	}
+	
+	/**
+	 * 用户登录提交表单处理方法
+	 * @param request
+	 * @param user
+	 * @param cpacha
+	 * @return
+	 */
+	@RequestMapping(value=&quot;/login&quot;,method=RequestMethod.POST)
+	@ResponseBody
+	public Result&lt;Boolean&gt; login(HttpServletRequest request,User user,String cpacha){
+<span class="nc bnc" id="L105" title="All 2 branches missed.">		if(user == null){</span>
+<span class="nc" id="L106">			return Result.error(CodeMsg.DATA_ERROR);</span>
+		}
+		//用统一验证实体方法验证是否合法
+<span class="nc" id="L109">		CodeMsg validate = ValidateEntityUtil.validate(user);</span>
+<span class="nc bnc" id="L110" title="All 2 branches missed.">		if(validate.getCode() != CodeMsg.SUCCESS.getCode()){</span>
+<span class="nc" id="L111">			return Result.error(validate);</span>
+		}
+		//表示实体信息合法，开始验证验证码是否为空
+<span class="nc bnc" id="L114" title="All 2 branches missed.">		if(StringUtils.isEmpty(cpacha)){</span>
+<span class="nc" id="L115">			return Result.error(CodeMsg.CPACHA_EMPTY);</span>
+		}
+		//说明验证码不为空，从session里获取验证码
+<span class="nc" id="L118">		Object attribute = request.getSession().getAttribute(&quot;admin_login&quot;);</span>
+<span class="nc bnc" id="L119" title="All 2 branches missed.">		if(attribute == null){</span>
+<span class="nc" id="L120">			return Result.error(CodeMsg.SESSION_EXPIRED);</span>
+		}
+		//表示session未失效，进一步判断用户填写的验证码是否正确
+<span class="nc bnc" id="L123" title="All 2 branches missed.">		if(!cpacha.equalsIgnoreCase(attribute.toString())){</span>
+<span class="nc" id="L124">			return Result.error(CodeMsg.CPACHA_ERROR);</span>
+		}
+		//表示验证码正确，开始查询数据库，检验密码是否正确
+<span class="nc" id="L127">		User findByUsername = userService.findByUsername(user.getUsername());</span>
+		//判断是否为空
+<span class="nc bnc" id="L129" title="All 2 branches missed.">		if(findByUsername == null){</span>
+<span class="nc" id="L130">			return Result.error(CodeMsg.ADMIN_USERNAME_NO_EXIST);</span>
+		}
+		//表示用户存在，进一步对比密码是否正确
+<span class="nc bnc" id="L133" title="All 2 branches missed.">		if(!findByUsername.getPassword().equals(user.getPassword())){</span>
+<span class="nc" id="L134">			return Result.error(CodeMsg.ADMIN_PASSWORD_ERROR);</span>
+		}
+		//表示密码正确，接下来判断用户状态是否可用
+<span class="nc bnc" id="L137" title="All 2 branches missed.">		if(findByUsername.getStatus() == User.ADMIN_USER_STATUS_UNABLE){</span>
+<span class="nc" id="L138">			return Result.error(CodeMsg.ADMIN_USER_UNABLE);</span>
+		}
+		//检查用户所属角色状态是否可用
+<span class="nc bnc" id="L141" title="All 4 branches missed.">		if(findByUsername.getRole() == null || findByUsername.getRole().getStatus() == Role.ADMIN_ROLE_STATUS_UNABLE){</span>
+<span class="nc" id="L142">			return Result.error(CodeMsg.ADMIN_USER_ROLE_UNABLE);</span>
+		}
+		//检查用户所属角色的权限是否存在
+<span class="nc bnc" id="L145" title="All 4 branches missed.">		if(findByUsername.getRole().getAuthorities() == null || findByUsername.getRole().getAuthorities().size() == 0){</span>
+<span class="nc" id="L146">			return Result.error(CodeMsg.ADMIN_USER_ROLE_AUTHORITES_EMPTY);</span>
+		}
+		//检查一切符合，可以登录，将用户信息存放至session
+<span class="nc" id="L149">		request.getSession().setAttribute(SessionConstant.SESSION_USER_LOGIN_KEY, findByUsername);</span>
+		//销毁session中的验证码
+<span class="nc" id="L151">		request.getSession().setAttribute(&quot;admin_login&quot;, null);</span>
+		//将登陆记录写入日志库
+<span class="nc" id="L153">		operaterLogService.add(&quot;用户【&quot;+user.getUsername()+&quot;】于【&quot; + StringUtil.getFormatterDate(new Date(), &quot;yyyy-MM-dd HH:mm:ss&quot;) + &quot;】登录系统！&quot;);</span>
+<span class="nc" id="L154">		log.info(&quot;用户成功登录，user = &quot; + findByUsername);</span>
+<span class="nc" id="L155">		return Result.success(true);</span>
+	}
+	
+	/**
+	 * 登录成功后的系统主页
+	 * @param model
+	 * @return
+	 */
+	@RequestMapping(value=&quot;/index&quot;)
+	public String index(Model model){
+<span class="nc" id="L165">		model.addAttribute(&quot;operatorLogs&quot;, operaterLogService.findLastestLog(10));</span>
+<span class="nc" id="L166">		model.addAttribute(&quot;userTotal&quot;, accountService.total());</span>
+<span class="nc" id="L167">		model.addAttribute(&quot;accountGroupTotal&quot;, accountGroupService.total());</span>
+<span class="nc" id="L168">		model.addAttribute(&quot;onlineTotal&quot;, WebSocket.getOnlineCount());</span>
+<span class="nc" id="L169">		model.addAttribute(&quot;msgLogTotal&quot;, msgLogService.total());</span>
+<span class="nc" id="L170">		model.addAttribute(&quot;showTipsText&quot;, showTipsText);</span>
+<span class="nc" id="L171">		model.addAttribute(&quot;showTipsUrlText&quot;, showTipsUrlText);</span>
+<span class="nc" id="L172">		model.addAttribute(&quot;showTipsUtl&quot;, showTipsUtl);</span>
+<span class="nc" id="L173">		model.addAttribute(&quot;showTipsBtnText&quot;, showTipsBtnText);</span>
+<span class="nc" id="L174">		return &quot;admin/system/index&quot;;</span>
+	}
+	
+	/**
+	 * 注销登录
+	 * @return
+	 */
+	@RequestMapping(value=&quot;/logout&quot;)
+	public String logout(){
+<span class="nc" id="L183">		User loginedUser = SessionUtil.getLoginedUser();</span>
+<span class="nc bnc" id="L184" title="All 2 branches missed.">		if(loginedUser != null){</span>
+<span class="nc" id="L185">			SessionUtil.set(SessionConstant.SESSION_USER_LOGIN_KEY, null);</span>
+		}
+<span class="nc" id="L187">		return &quot;redirect:login&quot;;</span>
+	}
+	
+	/**
+	 * 无权限提示页面
+	 * @return
+	 */
+	@RequestMapping(value=&quot;/no_right&quot;)
+	public String noRight(){
+<span class="nc" id="L196">		return &quot;admin/system/no_right&quot;;</span>
+	}
+	
+	/**
+	 * 修改用户个人信息
+	 * @return
+	 */
+	@RequestMapping(value=&quot;/update_userinfo&quot;,method=RequestMethod.GET)
+	public String updateUserInfo(){
+<span class="nc" id="L205">		return &quot;admin/system/update_userinfo&quot;;</span>
+	}
+	
+	/**
+	 * 修改个人信息保存
+	 * @param user
+	 * @return
+	 */
+	@RequestMapping(value=&quot;/update_userinfo&quot;,method=RequestMethod.POST)
+	public String updateUserInfo(User user){
+<span class="nc" id="L215">		User loginedUser = SessionUtil.getLoginedUser();</span>
+<span class="nc" id="L216">		loginedUser.setEmail(user.getEmail());</span>
+<span class="nc" id="L217">		loginedUser.setMobile(user.getMobile());</span>
+<span class="nc" id="L218">		loginedUser.setHeadPic(user.getHeadPic());</span>
+		//首先保存到数据库
+<span class="nc" id="L220">		userService.save(loginedUser);</span>
+		//更新session里的值
+<span class="nc" id="L222">		SessionUtil.set(SessionConstant.SESSION_USER_LOGIN_KEY, loginedUser);</span>
+<span class="nc" id="L223">		return &quot;redirect:update_userinfo&quot;;</span>
+	}
+	
+	/**
+	 * 修改密码页面
+	 * @return
+	 */
+	@RequestMapping(value=&quot;/update_pwd&quot;,method=RequestMethod.GET)
+	public String updatePwd(){
+<span class="nc" id="L232">		return &quot;admin/system/update_pwd&quot;;</span>
+	}
+	
+	/**
+	 * 修改密码表单提交
+	 * @param oldPwd
+	 * @param newPwd
+	 * @return
+	 */
+	@RequestMapping(value=&quot;/update_pwd&quot;,method=RequestMethod.POST)
+	@ResponseBody
+	public Result&lt;Boolean&gt; updatePwd(@RequestParam(name=&quot;oldPwd&quot;,required=true)String oldPwd,
+			@RequestParam(name=&quot;newPwd&quot;,required=true)String newPwd
+			){
+<span class="nc" id="L246">		User loginedUser = SessionUtil.getLoginedUser();</span>
+<span class="nc bnc" id="L247" title="All 2 branches missed.">		if(!loginedUser.getPassword().equals(oldPwd)){</span>
+<span class="nc" id="L248">			return Result.error(CodeMsg.ADMIN_USER_UPDATE_PWD_ERROR);</span>
+		}
+<span class="nc bnc" id="L250" title="All 2 branches missed.">		if(StringUtils.isEmpty(newPwd)){</span>
+<span class="nc" id="L251">			return Result.error(CodeMsg.ADMIN_USER_UPDATE_PWD_EMPTY);</span>
+		}
+<span class="nc" id="L253">		loginedUser.setPassword(newPwd);</span>
+		//保存数据库
+<span class="nc" id="L255">		userService.save(loginedUser);</span>
+		//更新session
+<span class="nc" id="L257">		SessionUtil.set(SessionConstant.SESSION_USER_LOGIN_KEY, loginedUser);</span>
+<span class="nc" id="L258">		return Result.success(true);</span>
+	}
+	
+	/**
+	 * 日志管理列表
+	 * @param model
+	 * @param operaterLog
+	 * @param pageBean
+	 * @return
+	 */
+	@RequestMapping(value=&quot;/operator_log_list&quot;)
+	public String operatorLogList(Model model,OperaterLog operaterLog,PageBean&lt;OperaterLog&gt; pageBean){
+<span class="nc" id="L270">		model.addAttribute(&quot;pageBean&quot;, operaterLogService.findList(operaterLog, pageBean));</span>
+<span class="nc" id="L271">		model.addAttribute(&quot;operator&quot;, operaterLog.getOperator());</span>
+<span class="nc" id="L272">		model.addAttribute(&quot;title&quot;, &quot;日志列表&quot;);</span>
+<span class="nc" id="L273">		return &quot;admin/system/operator_log_list&quot;;</span>
+	}
+	
+	/**
+	 * 删除操作日志，可删除多个
+	 * @param ids
+	 * @return
+	 */
+	@RequestMapping(value=&quot;/delete_operator_log&quot;,method=RequestMethod.POST)
+	@ResponseBody
+	public Result&lt;Boolean&gt; delete(String ids){
+<span class="nc bnc" id="L284" title="All 2 branches missed.">		if(!StringUtils.isEmpty(ids)){</span>
+<span class="nc" id="L285">			String[] splitIds = ids.split(&quot;,&quot;);</span>
+<span class="nc bnc" id="L286" title="All 2 branches missed.">			for(String id : splitIds){</span>
+<span class="nc" id="L287">				operaterLogService.delete(Long.valueOf(id));</span>
+			}
+		}
+<span class="nc" id="L290">		return Result.success(true);</span>
+	}
+	
+	/**
+	 * 验证订单
+	 * @param orderSn
+	 * @param phone
+	 * @return
+	 */
+	@RequestMapping(value=&quot;/auth_order&quot;,method=RequestMethod.POST)
+	@ResponseBody
+	public Result&lt;Boolean&gt; authOrder(@RequestParam(name=&quot;orderSn&quot;,required=true)String orderSn,@RequestParam(name=&quot;phone&quot;,required=true)String phone){
+<span class="nc bnc" id="L302" title="All 2 branches missed.">		if(orderSn.length() &lt; 18){</span>
+<span class="nc" id="L303">			return Result.error(CodeMsg.ORDER_SN_ERROR);</span>
+		}
+<span class="nc bnc" id="L305" title="All 2 branches missed.">		if(phone.length() &lt; 11){</span>
+<span class="nc" id="L306">			return Result.error(CodeMsg.PHONE_ERROR);</span>
+		}
+<span class="nc bnc" id="L308" title="All 2 branches missed.">		if(!StringUtil.authOrder(orderSn, phone)){</span>
+<span class="nc" id="L309">			return Result.error(CodeMsg.ORDER_AUTH_ERROR);</span>
+		}
+<span class="nc" id="L311">		OrderAuth orderAuth = orderAuthService.findOne();</span>
+<span class="nc bnc" id="L312" title="All 2 branches missed.">		if(orderAuth == null){</span>
+<span class="nc" id="L313">			orderAuth = new OrderAuth();</span>
+		}
+<span class="nc" id="L315">		orderAuth.setMac(StringUtil.getMac());</span>
+<span class="nc" id="L316">		orderAuth.setOrderSn(orderSn);</span>
+<span class="nc" id="L317">		orderAuth.setPhone(phone);</span>
+<span class="nc" id="L318">		orderAuthService.save(orderAuth);</span>
+<span class="nc" id="L319">		AppConfig.ORDER_AUTH = 1;</span>
+<span class="nc" id="L320">		return Result.success(true);</span>
+	}
+	
+	/**
+	 * 清空整个日志
+	 * @return
+	 */
+	@RequestMapping(value=&quot;/delete_all_operator_log&quot;,method=RequestMethod.POST)
+	@ResponseBody
+	public Result&lt;Boolean&gt; deleteAll(){
+<span class="nc" id="L330">		operaterLogService.deleteAll();</span>
+<span class="nc" id="L331">		return Result.success(true);</span>
+	}
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.10.202304240956</span></div></body></html>

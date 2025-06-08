@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="zh"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>DownloadController.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">ChatOnline Coverage Report</a> &gt; <a href="index.source.html" class="el_package">com.yuanlrc.base.controller.common</a> &gt; <span class="el_source">DownloadController.java</span></div><h1>DownloadController.java</h1><pre class="source lang-java linenums">package com.yuanlrc.base.controller.common;
+
+import java.io.BufferedInputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+
+import javax.servlet.ServletOutputStream;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
+import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+
+
+/**
+ * 下载控制器统一管理类
+ * @author llq
+ *
+ */
+@RequestMapping(&quot;/download&quot;)
+@Controller
+<span class="nc" id="L28">public class DownloadController {</span>
+
+	@Value(&quot;${ylrc.upload.file.path}&quot;)
+	private String uploadFilePath;//文件保存位置
+	
+	/**
+	 * 统一文件下载方法
+	 * @param fid
+	 * @param request
+	 * @param response
+	 */
+	@RequestMapping(value=&quot;/download_file&quot;)
+	public void downloadFile(@RequestParam(name=&quot;filename&quot;,required=true)String filename,
+			@RequestParam(name=&quot;downloadname&quot;,required=true,defaultValue=&quot;&quot;)String downloadname,
+			HttpServletRequest request,
+			HttpServletResponse response){
+<span class="nc bnc" id="L44" title="All 2 branches missed.">		if(StringUtils.isEmpty(downloadname)){</span>
+<span class="nc" id="L45">			downloadname = filename;</span>
+		}
+		try {
+<span class="nc" id="L48">			File file = new File(uploadFilePath+filename);</span>
+<span class="nc" id="L49">			response.setContentLength(Integer.valueOf(file.length()+&quot;&quot;));</span>
+<span class="nc" id="L50">			response.setContentType(Files.probeContentType(Paths.get(uploadFilePath+filename)));</span>
+<span class="nc" id="L51">			String suffix = filename.substring(filename.lastIndexOf(&quot;.&quot;),filename.length());</span>
+<span class="nc" id="L52">			response.setHeader(&quot;Content-Disposition&quot;,&quot;attachment;filename=&quot; + new String(downloadname.getBytes(&quot;UTF-8&quot;), &quot;ISO8859-1&quot;)+suffix);</span>
+<span class="nc" id="L53">			writefile(response, file);</span>
+<span class="nc" id="L54">		} catch (Exception e) {</span>
+			//e.printStackTrace();
+		}
+<span class="nc" id="L57">	}</span>
+	
+	
+	/**
+	 * 写文件 方法
+	 * 
+	 * @param response
+	 * @param file
+	 * @throws IOException 
+	 */
+	public void writefile(HttpServletResponse response, java.io.File file) {
+<span class="nc" id="L68">		byte[] buff = new byte[1024];</span>
+<span class="nc" id="L69">		FileInputStream fis = null;</span>
+<span class="nc" id="L70">		BufferedInputStream bis = null;</span>
+		try {
+<span class="nc" id="L72">			fis = new FileInputStream(file);</span>
+<span class="nc" id="L73">			bis = new BufferedInputStream(fis);</span>
+<span class="nc" id="L74">			ServletOutputStream outputStream = response.getOutputStream();</span>
+<span class="nc" id="L75">			int i = bis.read(buff);</span>
+<span class="nc bnc" id="L76" title="All 2 branches missed.">			while(i != -1){</span>
+<span class="nc" id="L77">				outputStream.write(buff, 0, i);</span>
+<span class="nc" id="L78">				i = bis.read(buff);</span>
+			}
+<span class="nc" id="L80">			bis.close();</span>
+<span class="nc" id="L81">			fis.close();</span>
+<span class="nc" id="L82">		} catch (Exception e) {</span>
+			//e.printStackTrace();
+		}
+		
+<span class="nc" id="L86">	}</span>
+	
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.10.202304240956</span></div></body></html>

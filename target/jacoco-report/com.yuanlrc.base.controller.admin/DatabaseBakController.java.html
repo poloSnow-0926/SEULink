@@ -1,0 +1,106 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="zh"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>DatabaseBakController.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">chatonline</a> &gt; <a href="index.source.html" class="el_package">com.yuanlrc.base.controller.admin</a> &gt; <span class="el_source">DatabaseBakController.java</span></div><h1>DatabaseBakController.java</h1><pre class="source lang-java linenums">package com.yuanlrc.base.controller.admin;
+
+import java.io.File;
+
+import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
+
+import com.yuanlrc.base.bean.PageBean;
+import com.yuanlrc.base.bean.Result;
+import com.yuanlrc.base.entity.admin.DatabaseBak;
+import com.yuanlrc.base.service.admin.DatabaseBakService;
+import com.yuanlrc.base.service.admin.OperaterLogService;
+
+/**
+ * 数据库备份管理控制器
+ * @author Administrator
+ *
+ */
+@RequestMapping(&quot;/admin/database_bak&quot;)
+@Controller
+<span class="nc" id="L30">public class DatabaseBakController {</span>
+
+	@Autowired
+	private OperaterLogService operaterLogService;
+	
+	@Autowired
+	private DatabaseBakService databaseBakService;
+	
+	@Value(&quot;${ylrc.database.backup.dir}&quot;)
+	private String backUpDir;
+	
+<span class="nc" id="L41">	private Logger log = LoggerFactory.getLogger(DatabaseBakController.class);</span>
+	
+	/**
+	 * 数据库备份文件管理列表页面
+	 * @param model
+	 * @param pageBean
+	 * @return
+	 */
+	@RequestMapping(value=&quot;/list&quot;)
+	public String list(Model model,PageBean&lt;DatabaseBak&gt; pageBean){
+<span class="nc" id="L51">		model.addAttribute(&quot;title&quot;, &quot;备份列表&quot;);</span>
+<span class="nc" id="L52">		model.addAttribute(&quot;pageBean&quot;, databaseBakService.findList(pageBean));</span>
+<span class="nc" id="L53">		return &quot;admin/database_bak/list&quot;;</span>
+	}
+	
+	/**
+	 * 数据库备份操作
+	 * @return
+	 */
+	@RequestMapping(value=&quot;add&quot;,method=RequestMethod.POST)
+	@ResponseBody
+	public Result&lt;Boolean&gt; add(){
+<span class="nc" id="L63">		databaseBakService.backup();</span>
+<span class="nc" id="L64">		return Result.success(true);</span>
+	}
+	
+	/**
+	 * 删除备份的记录及文件
+	 * @param ids
+	 * @return
+	 */
+	@RequestMapping(value=&quot;delete&quot;,method=RequestMethod.POST)
+	@ResponseBody
+	public Result&lt;Boolean&gt; delete(String ids){
+<span class="nc bnc" id="L75" title="All 2 branches missed.">		if(!StringUtils.isEmpty(ids)){</span>
+<span class="nc" id="L76">			String[] splitIds = ids.split(&quot;,&quot;);</span>
+<span class="nc bnc" id="L77" title="All 2 branches missed.">			for(String id : splitIds){</span>
+<span class="nc" id="L78">				DatabaseBak databaseBak = databaseBakService.find(Long.valueOf(id));</span>
+<span class="nc bnc" id="L79" title="All 2 branches missed.">				if(databaseBak != null){</span>
+<span class="nc" id="L80">					databaseBakService.delete(Long.valueOf(id));</span>
+<span class="nc" id="L81">					File file = new File(databaseBak.getFilepath() + databaseBak.getFilename());</span>
+<span class="nc bnc" id="L82" title="All 2 branches missed.">					if(!file.exists()){</span>
+						//此时说明文件不存在，按照配置文件的路径重新寻找文件
+<span class="nc" id="L84">						file = new File(backUpDir + databaseBak.getFilename());</span>
+					}
+<span class="nc" id="L86">					file.delete();</span>
+<span class="nc" id="L87">					log.info(&quot;删除数据库备份文件，备份ID=&quot;+id);</span>
+				}
+			}
+		}
+<span class="nc" id="L91">		return Result.success(true);</span>
+	}
+	
+	/**
+	 * 还原数据库文件
+	 * @param id
+	 * @return
+	 */
+	@RequestMapping(value=&quot;restore&quot;,method=RequestMethod.POST)
+	@ResponseBody
+	public Result&lt;Boolean&gt; restore(@RequestParam(name=&quot;id&quot;,required=true)Long id){
+<span class="nc" id="L102">		databaseBakService.restore(id);</span>
+<span class="nc" id="L103">		return Result.success(true);</span>
+	}
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.10.202304240956</span></div></body></html>

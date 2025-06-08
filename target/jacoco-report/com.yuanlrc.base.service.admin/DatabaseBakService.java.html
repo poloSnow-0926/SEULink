@@ -1,0 +1,142 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="zh"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>DatabaseBakService.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">chatonline</a> &gt; <a href="index.source.html" class="el_package">com.yuanlrc.base.service.admin</a> &gt; <span class="el_source">DatabaseBakService.java</span></div><h1>DatabaseBakService.java</h1><pre class="source lang-java linenums">package com.yuanlrc.base.service.admin;
+import java.io.File;
+import java.io.IOException;
+import java.util.Date;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+/**
+ * 数据库备份service
+ */
+import org.springframework.stereotype.Service;
+
+import com.yuanlrc.base.bean.PageBean;
+import com.yuanlrc.base.dao.admin.DatabaseBakDao;
+import com.yuanlrc.base.entity.admin.DatabaseBak;
+import com.yuanlrc.base.util.StringUtil;
+
+@Service
+<span class="nc" id="L24">public class DatabaseBakService {</span>
+
+	@Autowired
+	private OperaterLogService operaterLogService;
+	@Autowired
+	private DatabaseBakDao databaseBakDao;
+	@Value(&quot;${ylrc.database.backup.dir}&quot;)
+	private String backUpDir;
+	@Value(&quot;${ylrc.database.backup.username}&quot;)
+	private String dbUsername;
+	@Value(&quot;${ylrc.database.backup.password}&quot;)
+	private String dbPwd;
+	@Value(&quot;${ylrc.database.backup.database.name}&quot;)
+	private String dbName;
+	
+<span class="nc" id="L39">	private Logger log = LoggerFactory.getLogger(DatabaseBakService.class);</span>
+	
+	/**
+	 * 分页查找数据库备份记录
+	 * @param operaterLog
+	 * @param pageBean
+	 * @return
+	 */
+	public PageBean&lt;DatabaseBak&gt; findList(PageBean&lt;DatabaseBak&gt; pageBean){
+<span class="nc" id="L48">		Pageable pageable = PageRequest.of(pageBean.getCurrentPage()-1, pageBean.getPageSize());</span>
+<span class="nc" id="L49">		Page&lt;DatabaseBak&gt; findAll = databaseBakDao.findAll(pageable);</span>
+<span class="nc" id="L50">		pageBean.setContent(findAll.getContent());</span>
+<span class="nc" id="L51">		pageBean.setTotal(findAll.getTotalElements());</span>
+<span class="nc" id="L52">		pageBean.setTotalPage(findAll.getTotalPages());</span>
+<span class="nc" id="L53">		return pageBean;</span>
+	}
+	
+	/**
+	 * 添加或修改数据库备份记录
+	 * @param databaseBak
+	 * @return
+	 */
+	public DatabaseBak save(DatabaseBak databaseBak){
+<span class="nc" id="L62">		return databaseBakDao.save(databaseBak);</span>
+	}
+	
+	/**
+	 * 根据id查询
+	 * @param id
+	 * @return
+	 */
+	public DatabaseBak find(Long id){
+<span class="nc" id="L71">		return databaseBakDao.find(id);</span>
+	}
+	
+	/**
+	 * 根据id删除
+	 * @param id
+	 */
+	public void delete(Long id){
+<span class="nc" id="L79">		databaseBakDao.deleteById(id);</span>
+<span class="nc" id="L80">	}</span>
+	
+	/**
+	 * 备份数据库
+	 */
+	public void backup(){
+<span class="nc" id="L86">		File path = new File(backUpDir);</span>
+<span class="nc bnc" id="L87" title="All 2 branches missed.">		if(!path.exists()){</span>
+<span class="nc" id="L88">			path.mkdir();</span>
+		}
+		try {
+<span class="nc" id="L91">			String filename = dbName + &quot;_&quot; + StringUtil.getFormatterDate(new Date(), &quot;yyyyMMddHHmmss&quot;) + &quot;.sql&quot;;</span>
+<span class="nc" id="L92">			String cmd = &quot;mysqldump -u&quot;+dbUsername+&quot; -p&quot;+dbPwd+&quot; &quot;+dbName+&quot; -r &quot; + backUpDir + filename;</span>
+<span class="nc" id="L93">			Runtime.getRuntime().exec(cmd);</span>
+<span class="nc" id="L94">			DatabaseBak databaseBak = new DatabaseBak();</span>
+<span class="nc" id="L95">			databaseBak.setFilename(filename);</span>
+<span class="nc" id="L96">			databaseBak.setFilepath(backUpDir);</span>
+<span class="nc" id="L97">			save(databaseBak);</span>
+<span class="nc" id="L98">			log.info(&quot;数据库备份成功&quot;);</span>
+<span class="nc" id="L99">			operaterLogService.add(&quot;数据库成功备份，备份文件信息：&quot; + databaseBak);</span>
+<span class="nc" id="L100">		} catch (IOException e) {</span>
+			// TODO Auto-generated catch block
+<span class="nc" id="L102">			e.printStackTrace();</span>
+<span class="nc" id="L103">		}</span>
+<span class="nc" id="L104">	}</span>
+	
+	/**
+	 * 还原数据库
+	 * @param id
+	 */
+	public void restore(Long id){
+<span class="nc" id="L111">		DatabaseBak databaseBak = find(id);</span>
+<span class="nc bnc" id="L112" title="All 2 branches missed.">		if(databaseBak != null){</span>
+			try {
+<span class="nc" id="L114">				String filename = databaseBak.getFilename();</span>
+<span class="nc" id="L115">				File file = new File(databaseBak.getFilepath() + databaseBak.getFilename());</span>
+<span class="nc" id="L116">				String cmd = &quot;mysql -u&quot;+dbUsername+&quot; -p&quot;+dbPwd+&quot; &quot;+dbName+&quot; &lt; &quot; + backUpDir + filename;;</span>
+<span class="nc bnc" id="L117" title="All 2 branches missed.">				if(!file.exists()){</span>
+<span class="nc" id="L118">					cmd = &quot;mysql -u&quot;+dbUsername+&quot; -p&quot;+dbPwd+&quot; &quot;+dbName+&quot; &lt; &quot; + databaseBak.getFilepath() + databaseBak.getFilename();</span>
+				}
+<span class="nc" id="L120">				String stmt1 = &quot;mysqladmin -u &quot;+dbUsername+&quot; -p&quot;+dbPwd+&quot; create &quot;+dbName;</span>
+<span class="nc" id="L121">				String[] cmds = { &quot;cmd&quot;, &quot;/c&quot;, cmd };</span>
+<span class="nc" id="L122">				Runtime.getRuntime().exec(stmt1);</span>
+<span class="nc" id="L123">				Process exec = Runtime.getRuntime().exec(cmds);</span>
+<span class="nc" id="L124">				log.info(StringUtil.getStringFromInputStream(exec.getErrorStream()));</span>
+<span class="nc" id="L125">				log.info(&quot;数据库还原成功&quot;);</span>
+<span class="nc" id="L126">				operaterLogService.add(&quot;数据库成功还原，还原文件信息：&quot; + databaseBak);</span>
+<span class="nc" id="L127">			} catch (IOException e) {</span>
+				// TODO Auto-generated catch block
+<span class="nc" id="L129">				e.printStackTrace();</span>
+<span class="nc" id="L130">			}</span>
+		}
+<span class="nc" id="L132">	}</span>
+	
+	/**
+	 * 备份总数
+	 * @return
+	 */
+	public long total(){
+<span class="nc" id="L139">		return databaseBakDao.count();</span>
+	}
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.10.202304240956</span></div></body></html>

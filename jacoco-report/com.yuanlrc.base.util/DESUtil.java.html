@@ -1,0 +1,100 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="zh"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>DESUtil.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">ChatOnline Coverage Report</a> &gt; <a href="index.source.html" class="el_package">com.yuanlrc.base.util</a> &gt; <span class="el_source">DESUtil.java</span></div><h1>DESUtil.java</h1><pre class="source lang-java linenums">package com.yuanlrc.base.util;
+
+import java.security.Key;
+import java.util.Base64;
+
+import javax.crypto.Cipher;
+import javax.crypto.SecretKeyFactory;
+import javax.crypto.spec.DESKeySpec;
+import javax.crypto.spec.IvParameterSpec;
+
+<span class="nc" id="L11">public class DESUtil {</span>
+	
+	/**
+     * 偏移变量，固定占8位字节
+     */
+    private final static String IV_PARAMETER = &quot;12345678&quot;;
+    /**
+     * 密钥算法
+     */
+    private static final String ALGORITHM = &quot;DES&quot;;
+    /**
+     * 加密/解密算法-工作模式-填充模式
+     */
+    private static final String CIPHER_ALGORITHM = &quot;DES/CBC/PKCS5Padding&quot;;
+    /**
+     * 默认编码
+     */
+    private static final String CHARSET = &quot;UTF-8&quot;;
+	
+	/**
+     * 计算加密key
+     * @param password
+     * @return
+     * @throws Exception
+     */
+    private static Key generateKey(String password) throws Exception {
+<span class="nc" id="L37">        DESKeySpec dks = new DESKeySpec(password.getBytes(CHARSET));</span>
+<span class="nc" id="L38">        SecretKeyFactory keyFactory = SecretKeyFactory.getInstance(ALGORITHM);</span>
+<span class="nc" id="L39">        return keyFactory.generateSecret(dks);</span>
+    }
+
+    /**
+     * 计算加密后的值
+     * @param key
+     * @param data
+     * @return
+     */
+    public static String encrypt(String key, String data) {
+<span class="nc bnc" id="L49" title="All 4 branches missed.">        if (key== null || key.length() &lt; 8) {</span>
+<span class="nc" id="L50">            throw new RuntimeException(&quot;加密失败，key不能小于8位&quot;);</span>
+        }
+<span class="nc bnc" id="L52" title="All 2 branches missed.">        if (data == null)</span>
+<span class="nc" id="L53">            return null;</span>
+        try {
+<span class="nc" id="L55">            Key secretKey = generateKey(key);</span>
+<span class="nc" id="L56">            Cipher cipher = Cipher.getInstance(CIPHER_ALGORITHM);</span>
+<span class="nc" id="L57">            IvParameterSpec iv = new IvParameterSpec(IV_PARAMETER.getBytes(CHARSET));</span>
+<span class="nc" id="L58">            cipher.init(Cipher.ENCRYPT_MODE, secretKey, iv);</span>
+<span class="nc" id="L59">            byte[] bytes = cipher.doFinal(data.getBytes(CHARSET));</span>
+ 
+            //JDK1.8及以上可直接使用Base64，JDK1.7及以下可以使用BASE64Encoder
+            //Android平台可以使用android.util.Base64
+<span class="nc" id="L63">            return new String(Base64.getEncoder().encode(bytes));</span>
+ 
+<span class="nc" id="L65">        } catch (Exception e) {</span>
+<span class="nc" id="L66">            e.printStackTrace();</span>
+<span class="nc" id="L67">            return data;</span>
+        }
+    }
+
+    /**
+     * DES解密字符串
+     *
+     * @param key 解密密码，长度不能够小于8位
+     * @param data 待解密字符串
+     * @return 解密后内容
+     */
+    public static String decrypt(String key, String data) {
+<span class="nc bnc" id="L79" title="All 4 branches missed.">        if (key== null || key.length() &lt; 8) {</span>
+<span class="nc" id="L80">            throw new RuntimeException(&quot;加密失败，key不能小于8位&quot;);</span>
+        }
+<span class="nc bnc" id="L82" title="All 2 branches missed.">        if (data == null)</span>
+<span class="nc" id="L83">            return null;</span>
+        try {
+<span class="nc" id="L85">            Key secretKey = generateKey(key);</span>
+<span class="nc" id="L86">            Cipher cipher = Cipher.getInstance(CIPHER_ALGORITHM);</span>
+<span class="nc" id="L87">            IvParameterSpec iv = new IvParameterSpec(IV_PARAMETER.getBytes(CHARSET));</span>
+<span class="nc" id="L88">            cipher.init(Cipher.DECRYPT_MODE, secretKey, iv);</span>
+<span class="nc" id="L89">            return new String(cipher.doFinal(Base64.getDecoder().decode(data.getBytes(CHARSET))), CHARSET);</span>
+<span class="nc" id="L90">        } catch (Exception e) {</span>
+<span class="nc" id="L91">            e.printStackTrace();</span>
+<span class="nc" id="L92">            return data;</span>
+        }
+    }
+
+    
+    public static void main(String[] args){
+<span class="nc" id="L98">    }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.10.202304240956</span></div></body></html>

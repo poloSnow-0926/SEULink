@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="zh"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>AccountController.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">ChatOnline Coverage Report</a> &gt; <a href="index.source.html" class="el_package">com.yuanlrc.base.controller.admin</a> &gt; <span class="el_source">AccountController.java</span></div><h1>AccountController.java</h1><pre class="source lang-java linenums">package com.yuanlrc.base.controller.admin;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
+
+import com.yuanlrc.base.bean.PageBean;
+import com.yuanlrc.base.bean.Result;
+import com.yuanlrc.base.entity.common.Account;
+import com.yuanlrc.base.service.admin.OperaterLogService;
+import com.yuanlrc.base.service.common.AccountService;
+
+/**
+ * 后台用户管理控制器
+ * @author Administrator
+ *
+ */
+@RequestMapping(&quot;/admin/account&quot;)
+@Controller
+<span class="nc" id="L24">public class AccountController {</span>
+
+	@Autowired
+	private AccountService accountService;
+	
+	@Autowired
+	private OperaterLogService operaterLogService;
+	/**
+	 * 用户列表页面
+	 * @param model
+	 * @param account
+	 * @param pageBean
+	 * @return
+	 */
+	@RequestMapping(value=&quot;/list&quot;)
+	public String list(Model model,Account account,PageBean&lt;Account&gt; pageBean){
+<span class="nc" id="L40">		model.addAttribute(&quot;title&quot;, &quot;用户列表&quot;);</span>
+<span class="nc" id="L41">		model.addAttribute(&quot;username&quot;, account.getUsername());</span>
+<span class="nc" id="L42">		model.addAttribute(&quot;pageBean&quot;, accountService.findList(account, pageBean));</span>
+<span class="nc" id="L43">		return &quot;admin/account/list&quot;;</span>
+	}
+	
+	/**
+	 * 编辑用户
+	 * @param id
+	 * @return
+	 */
+	@RequestMapping(value=&quot;/edit&quot;,method=RequestMethod.POST)
+	@ResponseBody
+	public Result&lt;Boolean&gt; edit(@RequestParam(name=&quot;id&quot;,required=true)Long id,@RequestParam(name=&quot;status&quot;,required=true)Integer status){
+<span class="nc" id="L54">		Account account = accountService.find(id);</span>
+<span class="nc bnc" id="L55" title="All 2 branches missed.">		if(account != null){</span>
+<span class="nc" id="L56">			account.setStatus(status);</span>
+<span class="nc" id="L57">			accountService.save(account);</span>
+		}
+<span class="nc" id="L59">		operaterLogService.add(&quot;编辑用户状态，用户ID：&quot; + id);</span>
+<span class="nc" id="L60">		return Result.success(true);</span>
+	}
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.10.202304240956</span></div></body></html>

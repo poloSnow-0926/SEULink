@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="zh"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>RuntimeConstant.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">chatonline</a> &gt; <a href="index.source.html" class="el_package">com.yuanlrc.base.constant</a> &gt; <span class="el_source">RuntimeConstant.java</span></div><h1>RuntimeConstant.java</h1><pre class="source lang-java linenums">package com.yuanlrc.base.constant;
+
+import java.util.Arrays;
+import java.util.List;
+
+/**
+ * 系统运行时的常量
+ * @author Administrator
+ *
+ */
+<span class="nc" id="L11">public class RuntimeConstant {</span>
+
+	//后台登录拦截器无需拦截的url
+<span class="nc" id="L14">	public static List&lt;String&gt; loginExcludePathPatterns = Arrays.asList(</span>
+			&quot;/home/**&quot;,
+			&quot;/system/login&quot;,
+			&quot;/admin/css/**&quot;,
+			&quot;/admin/fonts/**&quot;,
+			&quot;/admin/js/**&quot;,
+			&quot;/admin/images/**&quot;,
+			&quot;/error&quot;,
+			&quot;/webSocket/**&quot;,
+			&quot;/upload/upload_photo&quot;,
+			&quot;/upload/upload_file&quot;,
+			&quot;/download/download_file&quot;,
+			&quot;/photo/view&quot;,
+			&quot;/system/auth_order&quot;,
+			&quot;/cpacha/generate_cpacha&quot;
+		);
+	//后台权限拦截器无需拦截的url
+<span class="nc" id="L31">	public static List&lt;String&gt; authorityExcludePathPatterns = Arrays.asList(</span>
+			&quot;/home/**&quot;,
+			&quot;/system/login&quot;,
+			&quot;/system/auth_order&quot;,
+			&quot;/system/index&quot;,
+			&quot;/system/no_right&quot;,
+			&quot;/admin/css/**&quot;,
+			&quot;/admin/fonts/**&quot;,
+			&quot;/admin/js/**&quot;,
+			&quot;/admin/images/**&quot;,
+			&quot;/error&quot;,
+			&quot;/cpacha/generate_cpacha&quot;,
+			&quot;/system/logout&quot;,
+			&quot;/system/update_userinfo&quot;,
+			&quot;/system/update_pwd&quot;,
+			&quot;/webSocket/**&quot;,
+			&quot;/upload/upload_photo&quot;,
+			&quot;/upload/upload_file&quot;,
+			&quot;/download/download_file&quot;,
+			&quot;/photo/view&quot;
+		);
+	//前台登录拦截器无需拦截的url
+<span class="nc" id="L53">	public static List&lt;String&gt; homeLoginExcludePathPatterns = Arrays.asList(</span>
+			&quot;/admin/**&quot;,
+			&quot;/home/index/**&quot;,
+			&quot;/system/auth_order&quot;,
+			&quot;/home/css/**&quot;,
+			&quot;/home/fonts/**&quot;,
+			&quot;/home/js/**&quot;,
+			&quot;/home/images/**&quot;,
+			&quot;/home/layer/**&quot;,
+			&quot;/home/plugins/**&quot;,
+			&quot;/home/audio/**&quot;,
+			&quot;/system/**&quot;,
+			&quot;/error&quot;,
+			&quot;/webSocket/**&quot;,
+			&quot;/photo/view&quot;,
+			&quot;/download/download_file&quot;,
+			&quot;/upload/upload_photo&quot;,
+			&quot;/cpacha/generate_cpacha&quot;
+	);
+	//前台全局拦截器无需拦截的url
+<span class="nc" id="L73">	public static List&lt;String&gt; homeGlobalExcludePathPatterns = Arrays.asList(</span>
+			&quot;/admin/**&quot;,
+			&quot;/home/index/**&quot;,
+			&quot;/system/auth_order&quot;,
+			&quot;/home/css/**&quot;,
+			&quot;/home/fonts/**&quot;,
+			&quot;/home/js/**&quot;,
+			&quot;/home/images/**&quot;,
+			&quot;/home/layer/**&quot;,
+			&quot;/home/plugins/**&quot;,
+			&quot;/home/audio/**&quot;,
+			&quot;/system/**&quot;,
+			&quot;/error&quot;,
+			&quot;/webSocket/**&quot;,
+			&quot;/photo/view&quot;,
+			&quot;/upload/upload_photo&quot;,
+			&quot;/download/download_file&quot;,
+			&quot;/cpacha/generate_cpacha&quot;
+	);
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.10.202304240956</span></div></body></html>

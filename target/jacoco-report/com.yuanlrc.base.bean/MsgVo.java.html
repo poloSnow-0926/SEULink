@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="zh"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>MsgVo.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">chatonline</a> &gt; <a href="index.source.html" class="el_package">com.yuanlrc.base.bean</a> &gt; <span class="el_source">MsgVo.java</span></div><h1>MsgVo.java</h1><pre class="source lang-java linenums">package com.yuanlrc.base.bean;
+
+import java.util.List;
+
+import org.springframework.stereotype.Component;
+
+import com.yuanlrc.base.entity.common.MsgLog;
+
+/**
+ * 消息后台管理展示类
+ * @author Administrator
+ *
+ */
+@Component
+<span class="nc" id="L15">public class MsgVo {</span>
+
+	private String sender;//发送者
+	
+	private String reciever;//接受者
+	
+	private List&lt;MsgLog&gt; msgLogs;//关联消息记录
+
+	public String getSender() {
+<span class="nc" id="L24">		return sender;</span>
+	}
+
+	public void setSender(String sender) {
+<span class="nc" id="L28">		this.sender = sender;</span>
+<span class="nc" id="L29">	}</span>
+
+	public String getReciever() {
+<span class="nc" id="L32">		return reciever;</span>
+	}
+
+	public void setReciever(String reciever) {
+<span class="nc" id="L36">		this.reciever = reciever;</span>
+<span class="nc" id="L37">	}</span>
+
+	public List&lt;MsgLog&gt; getMsgLogs() {
+<span class="nc" id="L40">		return msgLogs;</span>
+	}
+
+	public void setMsgLogs(List&lt;MsgLog&gt; msgLogs) {
+<span class="nc" id="L44">		this.msgLogs = msgLogs;</span>
+<span class="nc" id="L45">	}</span>
+	
+	
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.10.202304240956</span></div></body></html>

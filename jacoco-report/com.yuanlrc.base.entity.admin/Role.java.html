@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="zh"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>Role.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">ChatOnline Coverage Report</a> &gt; <a href="index.source.html" class="el_package">com.yuanlrc.base.entity.admin</a> &gt; <span class="el_source">Role.java</span></div><h1>Role.java</h1><pre class="source lang-java linenums">package com.yuanlrc.base.entity.admin;
+
+import java.util.List;
+
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.EntityListeners;
+import javax.persistence.ManyToMany;
+import javax.persistence.Table;
+
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
+
+import com.yuanlrc.base.annotion.ValidateEntity;
+import com.yuanlrc.base.entity.common.BaseEntity;
+
+/**
+ * 后台角色实体类
+ * @author Administrator
+ *
+ */
+@Entity
+@Table(name=&quot;ylrc_role&quot;)
+@EntityListeners(AuditingEntityListener.class)
+<span class="nc" id="L24">public class Role extends BaseEntity{</span>
+
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
+	
+	public static final int ADMIN_ROLE_STATUS_ENABLE = 1;//角色状态正常可用
+	public static final int ADMIN_ROLE_STATUS_UNABLE = 0;//角色状态不可用
+	
+	@ValidateEntity(required=true,requiredLeng=true,minLength=1,maxLength=18,errorRequiredMsg=&quot;角色名称不能为空!&quot;,errorMinLengthMsg=&quot;角色名称长度需大于1!&quot;,errorMaxLengthMsg=&quot;角色名称长度不能大于18!&quot;)
+	@Column(name=&quot;name&quot;,nullable=false,length=18)
+	private String name;//角色名称
+	
+	@ValidateEntity(required=false)
+	@Column(name=&quot;authorities&quot;)
+	@ManyToMany
+	private List&lt;Menu&gt; authorities;//角色所对应的权限（菜单）列表
+	
+	@ValidateEntity(required=false)
+	@Column(name=&quot;status&quot;,length=1)
+<span class="nc" id="L45">	private int status = ADMIN_ROLE_STATUS_ENABLE;//角色状态,默认可用</span>
+
+	@ValidateEntity(required=false)
+	@Column(name=&quot;remark&quot;,length=128)
+	private String remark;//角色备注
+
+	public String getName() {
+<span class="nc" id="L52">		return name;</span>
+	}
+
+	public void setName(String name) {
+<span class="nc" id="L56">		this.name = name;</span>
+<span class="nc" id="L57">	}</span>
+
+	public List&lt;Menu&gt; getAuthorities() {
+<span class="nc" id="L60">		return authorities;</span>
+	}
+
+	public void setAuthorities(List&lt;Menu&gt; authorities) {
+<span class="nc" id="L64">		this.authorities = authorities;</span>
+<span class="nc" id="L65">	}</span>
+
+	public int getStatus() {
+<span class="nc" id="L68">		return status;</span>
+	}
+
+	public void setStatus(int status) {
+<span class="nc" id="L72">		this.status = status;</span>
+<span class="nc" id="L73">	}</span>
+
+	public String getRemark() {
+<span class="nc" id="L76">		return remark;</span>
+	}
+
+	public void setRemark(String remark) {
+<span class="nc" id="L80">		this.remark = remark;</span>
+<span class="nc" id="L81">	}</span>
+
+	@Override
+	public String toString() {
+<span class="nc" id="L85">		return &quot;Role [name=&quot; + name + &quot;, authorities=&quot; + authorities</span>
+<span class="nc" id="L86">				+ &quot;, status=&quot; + status + &quot;, remark=&quot; + remark + &quot;]&quot;;</span>
+	}
+	
+	
+	
+	
+	
+	
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.10.202304240956</span></div></body></html>

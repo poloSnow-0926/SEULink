@@ -1,0 +1,137 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="zh"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>HomeIndexController.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">ChatOnline Coverage Report</a> &gt; <a href="index.source.html" class="el_package">com.yuanlrc.base.controller.home</a> &gt; <span class="el_source">HomeIndexController.java</span></div><h1>HomeIndexController.java</h1><pre class="source lang-java linenums">package com.yuanlrc.base.controller.home;
+
+import java.util.Date;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.ResponseBody;
+
+import com.yuanlrc.base.bean.CodeMsg;
+import com.yuanlrc.base.bean.Result;
+import com.yuanlrc.base.constant.SessionConstant;
+import com.yuanlrc.base.entity.common.Account;
+import com.yuanlrc.base.service.admin.OperaterLogService;
+import com.yuanlrc.base.service.common.AccountService;
+import com.yuanlrc.base.util.SessionUtil;
+import com.yuanlrc.base.util.StringUtil;
+import com.yuanlrc.base.util.ValidateEntityUtil;
+
+/**
+ * 前台首页控制器
+ * @author Administrator
+ *
+ */
+@RequestMapping(&quot;/home/index&quot;)
+@Controller
+<span class="nc" id="L31">public class HomeIndexController {</span>
+
+	@Autowired
+	private AccountService accountService;
+	@Autowired
+	private OperaterLogService operaterLogService;
+	
+<span class="nc" id="L38">	private Logger log = LoggerFactory.getLogger(HomeIndexController.class);</span>
+	/**
+	 * 登录页面
+	 * @param name
+	 * @param model
+	 * @return
+	 */
+	@RequestMapping(value=&quot;/login&quot;,method=RequestMethod.GET)
+	public String login(Model model){
+<span class="nc" id="L47">		return &quot;home/index/login&quot;;</span>
+	}
+	
+	/**
+	 * 退出登录
+	 * @param model
+	 * @return
+	 */
+	@RequestMapping(value=&quot;/logout&quot;,method=RequestMethod.GET)
+	public String logout(Model model){
+<span class="nc" id="L57">		Account onlineAccount = (Account)SessionUtil.get(SessionConstant.SESSION_ACCOUNT_LOGIN_KEY);</span>
+<span class="nc" id="L58">		onlineAccount = accountService.find(onlineAccount.getId());</span>
+<span class="nc" id="L59">		onlineAccount.setChatStatus(Account.ACOUNT_CHAT_STATUS_OFFLINE);</span>
+<span class="nc" id="L60">		accountService.save(onlineAccount);</span>
+<span class="nc" id="L61">		SessionUtil.set(SessionConstant.SESSION_ACCOUNT_LOGIN_KEY, null);</span>
+<span class="nc" id="L62">		return &quot;redirect:login&quot;;</span>
+	}
+	
+	/**
+	 * 注册页面
+	 * @param name
+	 * @param model
+	 * @return
+	 */
+	@RequestMapping(value=&quot;/register&quot;,method=RequestMethod.GET)
+	public String register(Model model){
+<span class="nc" id="L73">		return &quot;home/index/register&quot;;</span>
+	}
+	
+	/**
+	 * 提交注册表单
+	 * @param account
+	 * @return
+	 */
+	@RequestMapping(value=&quot;/register&quot;,method=RequestMethod.POST)
+	@ResponseBody
+	public Result&lt;Boolean&gt; register(Account account){
+<span class="nc bnc" id="L84" title="All 2 branches missed.">		if(account == null){</span>
+<span class="nc" id="L85">			return Result.error(CodeMsg.DATA_ERROR);</span>
+		}
+		//用统一验证实体方法验证是否合法
+<span class="nc" id="L88">		CodeMsg validate = ValidateEntityUtil.validate(account);</span>
+<span class="nc bnc" id="L89" title="All 2 branches missed.">		if(validate.getCode() != CodeMsg.SUCCESS.getCode()){</span>
+<span class="nc" id="L90">			return Result.error(validate);</span>
+		}
+		//检查用户名是否重复
+<span class="nc bnc" id="L93" title="All 2 branches missed.">		if(accountService.isExistUsername(account.getUsername(), 0l)){</span>
+<span class="nc" id="L94">			return Result.error(CodeMsg.ACCOUNT_USERNAME_EXIST);</span>
+		}
+<span class="nc bnc" id="L96" title="All 2 branches missed.">		if(accountService.save(account) == null){</span>
+<span class="nc" id="L97">			return Result.error(CodeMsg.ACCOUNT_REGISTER_ERROR);</span>
+		}
+<span class="nc" id="L99">		operaterLogService.add(&quot;用户【&quot;+account.getUsername()+&quot;】于【&quot; + StringUtil.getFormatterDate(new Date(), &quot;yyyy-MM-dd HH:mm:ss&quot;) + &quot;】注册成功！&quot;);</span>
+<span class="nc" id="L100">		log.info(&quot;用户成功注册，user = &quot; + account);</span>
+<span class="nc" id="L101">		return Result.success(true);</span>
+	}
+	
+	/**
+	 * 登录表单提交
+	 * @param account
+	 * @return
+	 */
+	@RequestMapping(value=&quot;/login&quot;,method=RequestMethod.POST)
+	@ResponseBody
+	public Result&lt;Boolean&gt; login(Account account){
+<span class="nc bnc" id="L112" title="All 2 branches missed.">		if(account == null){</span>
+<span class="nc" id="L113">			return Result.error(CodeMsg.DATA_ERROR);</span>
+		}
+<span class="nc" id="L115">		Account findByUsername = accountService.findByUsername(account.getUsername());</span>
+<span class="nc bnc" id="L116" title="All 2 branches missed.">		if(findByUsername == null){</span>
+<span class="nc" id="L117">			return Result.error(CodeMsg.ACCOUNT_USERNAME_NO_EXIST);</span>
+		}
+		//检查密码是否正确
+<span class="nc bnc" id="L120" title="All 2 branches missed.">		if(!findByUsername.getPassword().equals(account.getPassword())){</span>
+<span class="nc" id="L121">			return Result.error(CodeMsg.ACCOUNT_PASSWORD_ERROR);</span>
+		}
+		//检查状态是否正常
+<span class="nc bnc" id="L124" title="All 2 branches missed.">		if(findByUsername.getStatus() != Account.ACOUNT_USER_STATUS_ENABLE){</span>
+<span class="nc" id="L125">			return Result.error(CodeMsg.ACCOUNT_STATUS_ERROR);</span>
+		}
+		//登录成功，修改在线状态为上线
+<span class="nc" id="L128">		findByUsername.setChatStatus(Account.ACOUNT_CHAT_STATUS_ONLINE);</span>
+<span class="nc" id="L129">		accountService.save(findByUsername);</span>
+		//将用户信息写入session
+<span class="nc" id="L131">		SessionUtil.set(SessionConstant.SESSION_ACCOUNT_LOGIN_KEY, findByUsername);</span>
+<span class="nc" id="L132">		operaterLogService.add(&quot;用户【&quot;+account.getUsername()+&quot;】于【&quot; + StringUtil.getFormatterDate(new Date(), &quot;yyyy-MM-dd HH:mm:ss&quot;) + &quot;】登录成功！&quot;);</span>
+<span class="nc" id="L133">		log.info(&quot;用户成功登录，user = &quot; + account);</span>
+<span class="nc" id="L134">		return Result.success(true);</span>
+	}
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.10.202304240956</span></div></body></html>

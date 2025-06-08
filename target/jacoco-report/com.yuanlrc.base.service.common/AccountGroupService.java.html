@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="zh"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>AccountGroupService.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">chatonline</a> &gt; <a href="index.source.html" class="el_package">com.yuanlrc.base.service.common</a> &gt; <span class="el_source">AccountGroupService.java</span></div><h1>AccountGroupService.java</h1><pre class="source lang-java linenums">package com.yuanlrc.base.service.common;
+import java.util.List;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Example;
+import org.springframework.data.domain.ExampleMatcher;
+import org.springframework.data.domain.ExampleMatcher.GenericPropertyMatchers;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+/**
+ * 聊天会话service
+ */
+import org.springframework.stereotype.Service;
+
+import com.yuanlrc.base.bean.PageBean;
+import com.yuanlrc.base.dao.common.AccountGroupDao;
+import com.yuanlrc.base.entity.common.AccountGroup;
+
+@Service
+<span class="nc" id="L21">public class AccountGroupService {</span>
+
+	@Autowired
+	private AccountGroupDao accountGroupDao;
+	
+	/**
+	 * 新增或编辑群
+	 * @param chatGroup
+	 * @return
+	 */
+	public AccountGroup save(AccountGroup accountGroup){
+<span class="nc" id="L32">		return accountGroupDao.save(accountGroup);</span>
+	}
+	
+	/**
+	 * 获取我创建的所有群列表
+	 * @param type
+	 * @param id
+	 * @return
+	 */
+	public List&lt;AccountGroup&gt; findMyGroups(Long id){
+<span class="nc" id="L42">		return accountGroupDao.findByAdminId(id);</span>
+	}
+	
+	/**
+	 * 分页查询群组列表
+	 * @param accountGroup
+	 * @param pageBean
+	 * @return
+	 */
+	public PageBean&lt;AccountGroup&gt; findList(AccountGroup accountGroup,PageBean&lt;AccountGroup&gt; pageBean){
+<span class="nc" id="L52">		ExampleMatcher withMatcher = ExampleMatcher.matching().withMatcher(&quot;name&quot;, GenericPropertyMatchers.contains());</span>
+<span class="nc" id="L53">		withMatcher = withMatcher.withIgnorePaths(&quot;minPeople&quot;,&quot;maxPeople&quot;,&quot;curPeople&quot;);</span>
+<span class="nc" id="L54">		Example&lt;AccountGroup&gt; example = Example.of(accountGroup, withMatcher);</span>
+<span class="nc" id="L55">		Pageable pageable = PageRequest.of(pageBean.getCurrentPage()-1, pageBean.getPageSize());</span>
+<span class="nc" id="L56">		Page&lt;AccountGroup&gt; findAll = accountGroupDao.findAll(example, pageable);</span>
+<span class="nc" id="L57">		pageBean.setContent(findAll.getContent());</span>
+<span class="nc" id="L58">		pageBean.setTotal(findAll.getTotalElements());</span>
+<span class="nc" id="L59">		pageBean.setTotalPage(findAll.getTotalPages());</span>
+<span class="nc" id="L60">		return pageBean;</span>
+	}
+	
+	/**
+	 * 根据id查询
+	 * @param id
+	 * @return
+	 */
+	public AccountGroup findById(Long id){
+<span class="nc" id="L69">		return accountGroupDao.find(id);</span>
+	}
+	
+	/**
+	 * 根据id删除
+	 * @param id
+	 */
+	public void delete(Long id){
+<span class="nc" id="L77">		accountGroupDao.deleteById(id);</span>
+<span class="nc" id="L78">	}</span>
+	
+	/**
+	 * 返回总数
+	 * @return
+	 */
+	public long total(){
+<span class="nc" id="L85">		return accountGroupDao.count();</span>
+	}
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.10.202304240956</span></div></body></html>

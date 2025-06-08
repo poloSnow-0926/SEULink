@@ -1,0 +1,126 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="zh"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>Menu.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">ChatOnline Coverage Report</a> &gt; <a href="index.source.html" class="el_package">com.yuanlrc.base.entity.admin</a> &gt; <span class="el_source">Menu.java</span></div><h1>Menu.java</h1><pre class="source lang-java linenums">package com.yuanlrc.base.entity.admin;
+
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.EntityListeners;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
+import javax.persistence.Table;
+
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
+
+import com.yuanlrc.base.annotion.ValidateEntity;
+import com.yuanlrc.base.entity.common.BaseEntity;
+
+/**
+ * 后台菜单实体类
+ * @author Administrator
+ *
+ */
+@Entity
+@Table(name=&quot;ylrc_menu&quot;)
+@EntityListeners(AuditingEntityListener.class)
+<span class="nc" id="L23">public class Menu extends BaseEntity{</span>
+
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
+	
+	@ValidateEntity(required=true,requiredLeng=true,minLength=1,maxLength=18,errorRequiredMsg=&quot;菜单名称不能为空!&quot;,errorMinLengthMsg=&quot;菜单名称长度需大于1!&quot;,errorMaxLengthMsg=&quot;菜单名称长度不能大于18!&quot;)
+	@Column(name=&quot;name&quot;,nullable=false,length=18)
+	private String name;//菜单名称
+	
+	@ManyToOne
+	@JoinColumn(name=&quot;parent_id&quot;)
+	private Menu parent;//菜单父分类
+	
+	@ValidateEntity(required=false)
+	@Column(name=&quot;url&quot;,length=128)
+	private String url;//菜单url
+
+	@ValidateEntity(required=false)
+	@Column(name=&quot;icon&quot;,length=32)
+	private String icon;//菜单图标icon
+	
+	@Column(name=&quot;sort&quot;,nullable=false,length=4)
+<span class="nc" id="L47">	private Integer sort = 0;//菜单顺序，默认升序排列,默认是0</span>
+
+	@Column(name=&quot;is_bitton&quot;,nullable=false)
+<span class="nc" id="L50">	private boolean isButton = false;//是否是按钮</span>
+	
+	@Column(name=&quot;is_show&quot;,nullable=false)
+<span class="nc" id="L53">	private boolean isShow = true;//是否显示</span>
+	
+	public String getName() {
+<span class="nc" id="L56">		return name;</span>
+	}
+
+	public void setName(String name) {
+<span class="nc" id="L60">		this.name = name;</span>
+<span class="nc" id="L61">	}</span>
+
+	public Menu getParent() {
+<span class="nc" id="L64">		return parent;</span>
+	}
+
+	public void setParent(Menu parent) {
+<span class="nc" id="L68">		this.parent = parent;</span>
+<span class="nc" id="L69">	}</span>
+
+	public String getUrl() {
+<span class="nc" id="L72">		return url;</span>
+	}
+
+	public void setUrl(String url) {
+<span class="nc" id="L76">		this.url = url;</span>
+<span class="nc" id="L77">	}</span>
+
+	public String getIcon() {
+<span class="nc" id="L80">		return icon;</span>
+	}
+
+	public void setIcon(String icon) {
+<span class="nc" id="L84">		this.icon = icon;</span>
+<span class="nc" id="L85">	}</span>
+
+	public Integer getSort() {
+<span class="nc" id="L88">		return sort;</span>
+	}
+
+	public void setSort(Integer sort) {
+<span class="nc" id="L92">		this.sort = sort;</span>
+<span class="nc" id="L93">	}</span>
+
+	
+	
+	public boolean isButton() {
+<span class="nc" id="L98">		return isButton;</span>
+	}
+
+	public void setButton(boolean isButton) {
+<span class="nc" id="L102">		this.isButton = isButton;</span>
+<span class="nc" id="L103">	}</span>
+
+	public boolean isShow() {
+<span class="nc" id="L106">		return isShow;</span>
+	}
+
+	public void setShow(boolean isShow) {
+<span class="nc" id="L110">		this.isShow = isShow;</span>
+<span class="nc" id="L111">	}</span>
+
+	@Override
+	public String toString() {
+<span class="nc" id="L115">		return &quot;Menu [name=&quot; + name + &quot;, parent=&quot; + parent + &quot;, url=&quot; + url</span>
+<span class="nc" id="L116">				+ &quot;, icon=&quot; + icon + &quot;, sort=&quot; + sort + &quot;, isButton=&quot;</span>
+<span class="nc" id="L117">				+ isButton + &quot;, isShow=&quot; + isShow + &quot;]&quot;;</span>
+	}
+
+	
+
+	
+	
+	
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.10.202304240956</span></div></body></html>

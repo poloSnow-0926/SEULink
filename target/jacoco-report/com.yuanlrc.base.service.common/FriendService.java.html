@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="zh"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>FriendService.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">chatonline</a> &gt; <a href="index.source.html" class="el_package">com.yuanlrc.base.service.common</a> &gt; <span class="el_source">FriendService.java</span></div><h1>FriendService.java</h1><pre class="source lang-java linenums">package com.yuanlrc.base.service.common;
+
+import java.util.List;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import com.yuanlrc.base.dao.common.FriendDao;
+import com.yuanlrc.base.entity.common.Friend;
+
+/**
+ * 好友service
+ * @author Administrator
+ *
+ */
+@Service
+<span class="nc" id="L17">public class FriendService {</span>
+
+	@Autowired
+	private FriendDao friendDao;
+	
+	/**
+	 * 更新或新增
+	 * @param addressBook
+	 * @return
+	 */
+	public Friend save(Friend friend){
+<span class="nc" id="L28">		return friendDao.save(friend);</span>
+	}
+	
+	/**
+	 * 根据id查找
+	 * @param account
+	 * @return
+	 */
+	public Friend find(Long id){
+<span class="nc" id="L37">		return friendDao.find(id);</span>
+	}
+	
+	/**
+	 * 获取我的好友列表
+	 * @return
+	 */
+	public List&lt;Friend&gt; findMyFriendList(Long id){
+<span class="nc" id="L45">		return friendDao.findByAccountId(id);</span>
+	}
+	
+	/**
+	 * 根据id删除
+	 * @param id
+	 */
+	public void delete(Long id){
+<span class="nc" id="L53">		friendDao.deleteById(id);</span>
+<span class="nc" id="L54">	}</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.10.202304240956</span></div></body></html>

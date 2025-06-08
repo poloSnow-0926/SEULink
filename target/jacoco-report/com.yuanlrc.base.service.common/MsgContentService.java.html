@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="zh"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>MsgContentService.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">chatonline</a> &gt; <a href="index.source.html" class="el_package">com.yuanlrc.base.service.common</a> &gt; <span class="el_source">MsgContentService.java</span></div><h1>MsgContentService.java</h1><pre class="source lang-java linenums">package com.yuanlrc.base.service.common;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Example;
+import org.springframework.data.domain.ExampleMatcher;
+import org.springframework.data.domain.ExampleMatcher.GenericPropertyMatchers;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.domain.Sort.Direction;
+import org.springframework.stereotype.Service;
+
+import com.yuanlrc.base.bean.PageBean;
+import com.yuanlrc.base.dao.common.MsgContentDao;
+import com.yuanlrc.base.entity.common.MsgContent;
+
+/**
+ * 消息内容管理service
+ * @author Administrator
+ *
+ */
+@Service
+<span class="nc" id="L24">public class MsgContentService {</span>
+
+	@Autowired
+	private MsgContentDao msgContentDao;
+	
+	/**
+	 * 根据id查询
+	 * @param id
+	 * @return
+	 */
+	public MsgContent find(Long id){
+<span class="nc" id="L35">		return msgContentDao.find(id);</span>
+	}
+	
+	
+	/**
+	 * 添加/编辑操作
+	 * @param account
+	 * @return
+	 */
+	public MsgContent save(MsgContent msgContent){
+<span class="nc" id="L45">		return msgContentDao.save(msgContent);</span>
+	}
+	
+	/**
+	 * 返回总数
+	 * @return
+	 */
+	public long total(){
+<span class="nc" id="L53">		return msgContentDao.count();</span>
+	}
+	
+	/**
+	 * 获取消息列表
+	 * @param msgContent
+	 * @param pageBean
+	 * @return
+	 */
+	public PageBean&lt;MsgContent&gt; findList(MsgContent msgContent,PageBean&lt;MsgContent&gt; pageBean){
+<span class="nc" id="L63">		ExampleMatcher withMatcher = ExampleMatcher.matching().withMatcher(&quot;msg&quot;, GenericPropertyMatchers.contains());</span>
+<span class="nc" id="L64">		withMatcher = withMatcher.withIgnorePaths(&quot;attachSize&quot;);</span>
+<span class="nc" id="L65">		Example&lt;MsgContent&gt; example = Example.of(msgContent, withMatcher);</span>
+<span class="nc" id="L66">		Pageable pageable = PageRequest.of(pageBean.getCurrentPage()-1, pageBean.getPageSize(),Sort.by(Direction.DESC, &quot;createTime&quot;));</span>
+<span class="nc" id="L67">		Page&lt;MsgContent&gt; findAll = msgContentDao.findAll(example, pageable);</span>
+<span class="nc" id="L68">		pageBean.setContent(findAll.getContent());</span>
+<span class="nc" id="L69">		pageBean.setTotal(findAll.getTotalElements());</span>
+<span class="nc" id="L70">		pageBean.setTotalPage(findAll.getTotalPages());</span>
+<span class="nc" id="L71">		return pageBean;</span>
+	}
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.10.202304240956</span></div></body></html>

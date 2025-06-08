@@ -1,0 +1,436 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="zh"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>WebSocket.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">chatonline</a> &gt; <a href="index.source.html" class="el_package">com.yuanlrc.base.server.home</a> &gt; <span class="el_source">WebSocket.java</span></div><h1>WebSocket.java</h1><pre class="source lang-java linenums">package com.yuanlrc.base.server.home;
+
+import java.io.IOException;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+
+import javax.websocket.OnClose;
+import javax.websocket.OnError;
+import javax.websocket.OnMessage;
+import javax.websocket.OnOpen;
+import javax.websocket.Session;
+import javax.websocket.server.PathParam;
+import javax.websocket.server.ServerEndpoint;
+
+import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import com.alibaba.fastjson.JSONObject;
+import com.yuanlrc.base.bean.WebSocketMsg;
+import com.yuanlrc.base.entity.common.Account;
+import com.yuanlrc.base.entity.common.AccountGroupMember;
+import com.yuanlrc.base.entity.common.Friend;
+import com.yuanlrc.base.entity.common.MsgContent;
+import com.yuanlrc.base.entity.common.MsgLog;
+import com.yuanlrc.base.service.common.AccountGroupMemberService;
+import com.yuanlrc.base.service.common.AccountService;
+import com.yuanlrc.base.service.common.FriendService;
+import com.yuanlrc.base.service.common.MsgContentService;
+import com.yuanlrc.base.service.common.MsgLogService;
+
+@Service
+@ServerEndpoint(&quot;/webSocket/{userid}&quot;)
+<span class="nc" id="L35">public class WebSocket {</span>
+
+<span class="nc" id="L37">	public static Map&lt;Long, WebSocket&gt; clients = new ConcurrentHashMap&lt;Long, WebSocket&gt;(); </span>
+	
+<span class="nc" id="L39">	public static int onlineCount = 0;//在线人数</span>
+    
+	private Long userid;//用户id
+	
+	private Session session;
+	
+	private List&lt;Friend&gt; friendList;
+	
+	private static AccountService accountService;
+	
+	private static FriendService friendService;
+	
+	private static MsgContentService msgContentService;
+	
+	private static MsgLogService msgLogService;
+	
+	private static AccountGroupMemberService accountGroupMemberService;
+	
+	/**
+	 * 建立连接
+	 * @param userid
+	 * @param session
+	 * @throws IOException
+	 */
+    @OnOpen 
+    public void onOpen(@PathParam(&quot;userid&quot;) Long userid, Session session) throws IOException { 
+<span class="nc" id="L65">        this.userid = userid;</span>
+<span class="nc" id="L66">        this.session = session;</span>
+<span class="nc" id="L67">        this.friendList = friendService.findMyFriendList(userid);</span>
+<span class="nc" id="L68">    	addOnlineCount(); </span>
+<span class="nc" id="L69">        clients.put(userid, this);</span>
+<span class="nc" id="L70">        System.out.println(&quot;成功建立连接，用户ID = 【&quot; + userid + &quot;】,当前在线用户数：&quot; + onlineCount);</span>
+        //检查该用户是否有未读消息
+<span class="nc" id="L72">        loadUnReadMsg(userid);</span>
+        //给所有好友发送上线消息
+<span class="nc" id="L74">        onlineNotice(userid);</span>
+<span class="nc" id="L75">    } </span>
+   
+	/**
+     * 连接关闭
+     * @throws IOException
+     */
+    @OnClose 
+    public void onClose() throws IOException { 
+<span class="nc" id="L83">        clients.remove(userid); </span>
+<span class="nc" id="L84">        subOnlineCount();</span>
+        //给所有好友发送下线消息
+<span class="nc" id="L86">        offlineNotice(userid);</span>
+<span class="nc" id="L87">        System.out.println(&quot;已断开连接，用户ID = 【&quot; + userid + &quot;】,当前在线用户数：&quot; + onlineCount);</span>
+<span class="nc" id="L88">    } </span>
+   
+    /**
+     * 当收到信息
+     * @param message
+     * @throws IOException
+     */
+    @OnMessage 
+    public void onMessage(String message) throws IOException { 
+<span class="nc" id="L97">    	WebSocketMsg webSocketMsg = JSONObject.parseObject(message, WebSocketMsg.class);</span>
+<span class="nc" id="L98">    	System.out.println(webSocketMsg);</span>
+<span class="nc" id="L99">    	sendMsg(webSocketMsg);</span>
+    	
+<span class="nc" id="L101">    } </span>
+   
+    /**
+     * 发生错误
+     * @param session
+     * @param error
+     */
+    @OnError 
+    public void onError(Session session, Throwable error) { 
+<span class="nc" id="L110">        error.printStackTrace(); </span>
+<span class="nc" id="L111">    } </span>
+    
+       
+    public void sendMessageAll(String message) throws IOException { 
+<span class="nc bnc" id="L115" title="All 2 branches missed.">        for (WebSocket item : clients.values()) { </span>
+<span class="nc" id="L116">            item.session.getAsyncRemote().sendText(message); </span>
+<span class="nc" id="L117">        } </span>
+<span class="nc" id="L118">    } </span>
+   
+    public static synchronized int getOnlineCount() { 
+<span class="nc" id="L121">        return onlineCount; </span>
+    } 
+   
+    public static synchronized void addOnlineCount() { 
+<span class="nc" id="L125">        WebSocket.onlineCount++; </span>
+<span class="nc" id="L126">    } </span>
+   
+    public static synchronized void subOnlineCount() { 
+<span class="nc" id="L129">        WebSocket.onlineCount--; </span>
+<span class="nc" id="L130">    } </span>
+   
+    public static synchronized Map&lt;Long, WebSocket&gt; getClients() { 
+<span class="nc" id="L133">        return clients;</span>
+    }
+    
+    /**
+     * 发送消息
+     * @param webSocketMsg
+     */
+    public void sendMsg(WebSocketMsg webSocketMsg){
+<span class="nc bnc" id="L141" title="All 2 branches missed.">    	if(WebSocketMsg.CHAT_TYPE_SINGLE.equals(webSocketMsg.getChatType())){</span>
+    		//单人聊天
+<span class="nc" id="L143">    		sendSingleMsg(webSocketMsg);</span>
+<span class="nc" id="L144">    		return;</span>
+    	}
+<span class="nc bnc" id="L146" title="All 2 branches missed.">    	if(WebSocketMsg.CHAT_TYPE_GROUP.equals(webSocketMsg.getChatType())){</span>
+    		//群聊天
+<span class="nc" id="L148">    		sendGroupMsg(webSocketMsg);</span>
+<span class="nc" id="L149">    		return;</span>
+    	}
+<span class="nc bnc" id="L151" title="All 2 branches missed.">    	if(WebSocketMsg.CHAT_TYPE_EVENT.equals(webSocketMsg.getChatType())){</span>
+    		//事件
+<span class="nc bnc" id="L153" title="All 2 branches missed.">    		if(WebSocketMsg.MSG_TYPE_REFRESH_FRIEND_LIST.equals(webSocketMsg.getMsgType())){</span>
+    			//刷新好友列表
+<span class="nc" id="L155">    			refreshFriendList(webSocketMsg);</span>
+    		}
+<span class="nc" id="L157">    		return;</span>
+    	}
+<span class="nc" id="L159">    }</span>
+	
+
+	/**
+     * 发送单人一对一聊天消息
+     * @param webSocket
+     * @param webSocketMsg
+     */
+    public void sendSingleMsg(WebSocketMsg webSocketMsg){
+<span class="nc" id="L168">    	WebSocket webSocket = clients.get(webSocketMsg.getToId());</span>
+<span class="nc" id="L169">    	Friend friend = null;</span>
+<span class="nc bnc" id="L170" title="All 2 branches missed.">    	if(webSocket != null){</span>
+<span class="nc" id="L171">    		friend = webSocket.getFriend(webSocketMsg.getFromId());</span>
+    	}else{
+<span class="nc" id="L173">    		List&lt;Friend&gt; myFriendList = friendService.findMyFriendList(webSocketMsg.getToId());</span>
+<span class="nc bnc" id="L174" title="All 2 branches missed.">    		for(Friend f: myFriendList){</span>
+<span class="nc bnc" id="L175" title="All 2 branches missed.">    			if(f.getFriendAccount().getId().longValue() == webSocketMsg.getFromId().longValue()){</span>
+<span class="nc" id="L176">    				friend = f;</span>
+<span class="nc" id="L177">    				break;</span>
+    			}
+<span class="nc" id="L179">    		}</span>
+    	}
+<span class="nc bnc" id="L181" title="All 2 branches missed.">    	if(friend == null){</span>
+    		//表示对方删除了你
+<span class="nc" id="L183">			webSocketMsg.setMsgType(WebSocketMsg.MSG_TYPE_NOTICE);</span>
+<span class="nc" id="L184">			webSocketMsg.setToId(userid);</span>
+<span class="nc" id="L185">			webSocketMsg.setMsg(&quot;你还不是对方的好友，请先加好友！&quot;);</span>
+<span class="nc" id="L186">			session.getAsyncRemote().sendText(JSONObject.toJSONString(webSocketMsg));</span>
+<span class="nc" id="L187">			return;</span>
+    	}
+<span class="nc bnc" id="L189" title="All 2 branches missed.">		if(friend.getStatus() == Friend.FRIEND_STATUS_BLOCK){</span>
+    		//表示对方拉黑了你
+<span class="nc" id="L191">    		webSocketMsg.setMsgType(WebSocketMsg.MSG_TYPE_NOTICE);</span>
+<span class="nc" id="L192">    		webSocketMsg.setToId(userid);</span>
+<span class="nc" id="L193">    		webSocketMsg.setMsg(&quot;你已被对方拉黑，无法发送消息！&quot;);</span>
+<span class="nc" id="L194">    		session.getAsyncRemote().sendText(JSONObject.toJSONString(webSocketMsg));</span>
+<span class="nc" id="L195">    		return;</span>
+    	}
+
+<span class="nc" id="L198">    	webSocketMsg.setFromId(friend.getId());</span>
+<span class="nc" id="L199">    	String extAttr = friend.getRemark() + &quot;;&quot; + friend.getFriendAccount().getHeadPic();</span>
+    	//将成员的头像和昵称放在附加字段中
+<span class="nc" id="L201">    	webSocketMsg.setExtAttr(extAttr);</span>
+<span class="nc bnc" id="L202" title="All 2 branches missed.">    	if(webSocketMsg.getMsgType() == WebSocketMsg.MSG_TYPE_ONLINE){</span>
+<span class="nc" id="L203">    		webSocketMsg.setMsg(&quot;您的好友【&quot; + friend.getRemark() + &quot;】上线啦！&quot;);</span>
+    	}
+<span class="nc bnc" id="L205" title="All 2 branches missed.">    	if(webSocketMsg.getMsgType() == WebSocketMsg.MSG_TYPE_OFFLINE){</span>
+<span class="nc" id="L206">    		webSocketMsg.setMsg(&quot;您的好友【&quot; + friend.getRemark() + &quot;】下线啦！&quot;);</span>
+    	}
+<span class="nc bnc" id="L208" title="All 2 branches missed.">    	if(webSocket != null){</span>
+<span class="nc" id="L209">    		webSocket.session.getAsyncRemote().sendText(JSONObject.toJSONString(webSocketMsg));</span>
+    	}
+    	
+<span class="nc bnc" id="L212" title="All 6 branches missed.">    	if(webSocketMsg.getMsgType() == WebSocketMsg.MSG_TYPE_NOTICE || webSocketMsg.getMsgType() == WebSocketMsg.MSG_TYPE_ONLINE || webSocketMsg.getMsgType() == WebSocketMsg.MSG_TYPE_OFFLINE){</span>
+    		//通知信息不需要保存到数据库
+<span class="nc" id="L214">    		return;</span>
+    	}
+    	//消息保存到数据库
+<span class="nc" id="L217">    	saveMsgLog(accountService.find(webSocketMsg.getToId()),saveMsgContent(webSocketMsg));</span>
+<span class="nc" id="L218">    }</span>
+    
+    /**
+     * 发送群聊天信息
+     * @param webSocketMsg
+     */
+    public void sendGroupMsg(WebSocketMsg webSocketMsg){
+    	//首先根据群id获取群成员
+<span class="nc" id="L226">    	List&lt;AccountGroupMember&gt; accountGroupMemberList = accountGroupMemberService.findByGroup(webSocketMsg.getToId());</span>
+<span class="nc bnc" id="L227" title="All 2 branches missed.">    	if(accountGroupMemberList == null){</span>
+    		//表示该群已解散
+<span class="nc" id="L229">			webSocketMsg.setMsgType(WebSocketMsg.MSG_TYPE_NOTICE);</span>
+<span class="nc" id="L230">			webSocketMsg.setToId(userid);</span>
+<span class="nc" id="L231">			webSocketMsg.setMsg(&quot;该群已被群主解散！&quot;);</span>
+<span class="nc" id="L232">			session.getAsyncRemote().sendText(JSONObject.toJSONString(webSocketMsg));</span>
+<span class="nc" id="L233">			return;</span>
+    	}
+<span class="nc" id="L235">    	AccountGroupMember accountGroupMember = getAccountGroupMember(accountGroupMemberList,webSocketMsg.getFromId());</span>
+<span class="nc bnc" id="L236" title="All 2 branches missed.">    	if(accountGroupMember == null){</span>
+<span class="nc" id="L237">    		webSocketMsg.setMsgType(WebSocketMsg.MSG_TYPE_NOTICE);</span>
+<span class="nc" id="L238">			webSocketMsg.setToId(userid);</span>
+<span class="nc" id="L239">			webSocketMsg.setMsg(&quot;您已被群主移除该群，群成员将不能接受您发送的消息！&quot;);</span>
+<span class="nc" id="L240">			session.getAsyncRemote().sendText(JSONObject.toJSONString(webSocketMsg));</span>
+<span class="nc" id="L241">			return;</span>
+    	}
+    	//说明这个群成员在线
+<span class="nc" id="L244">		String extAttr = accountGroupMember.getNickname() + &quot;;&quot; + accountGroupMember.getMember().getHeadPic();</span>
+		//将发送消息成员的头像和昵称放在附加字段中
+<span class="nc" id="L246">		webSocketMsg.setExtAttr(extAttr);</span>
+<span class="nc" id="L247">		MsgContent msgContent = saveMsgContent(webSocketMsg);</span>
+    	//遍历群成员
+<span class="nc bnc" id="L249" title="All 2 branches missed.">    	for(AccountGroupMember ag : accountGroupMemberList){</span>
+    		//排除给自己发消息
+<span class="nc bnc" id="L251" title="All 2 branches missed.">    		if(ag.getMember().getId().longValue() != webSocketMsg.getFromId().longValue()){</span>
+<span class="nc" id="L252">    			WebSocket webSocket = clients.get(ag.getMember().getId());</span>
+<span class="nc bnc" id="L253" title="All 2 branches missed.">    			if(webSocket != null){</span>
+<span class="nc" id="L254">    				webSocket.session.getAsyncRemote().sendText(JSONObject.toJSONString(webSocketMsg));</span>
+    			}
+    			//消息保存到数据库
+<span class="nc" id="L257">    	    	saveMsgLog(ag.getMember(),msgContent);</span>
+    		}
+<span class="nc" id="L259">    	}</span>
+<span class="nc" id="L260">    }</span>
+    
+    /**
+     * 根据账号id获取好友id
+     * @param userId
+     * @return
+     */
+    private Friend getFriend(Long userId){
+<span class="nc bnc" id="L268" title="All 2 branches missed.">    	for(Friend f : friendList){</span>
+<span class="nc bnc" id="L269" title="All 2 branches missed.">    		if(f.getFriendAccount().getId().longValue() == userId.longValue()){</span>
+<span class="nc" id="L270">    			return f;</span>
+    		}
+<span class="nc" id="L272">    	}</span>
+<span class="nc" id="L273">    	return null;</span>
+    }
+    
+    /**
+     * 加载未读消息
+     * @param userId
+     */
+    private void loadUnReadMsg(Long userId){
+<span class="nc" id="L281">    	List&lt;MsgLog&gt; msgLogs = msgLogService.findByAccountIdAndStatus(userId, MsgLog.MSG_STATUS_UNREAD);</span>
+<span class="nc bnc" id="L282" title="All 2 branches missed.">    	for(MsgLog msgLog : msgLogs){</span>
+<span class="nc" id="L283">    		this.session.getAsyncRemote().sendText(JSONObject.toJSONString(msgLog.getMsgContent()));</span>
+<span class="nc" id="L284">    		msgLog.setStatus(MsgLog.MSG_STATUS_READ);</span>
+    		//标记为已读
+<span class="nc" id="L286">    		msgLogService.save(msgLog);</span>
+<span class="nc" id="L287">    	}</span>
+<span class="nc" id="L288">    }</span>
+    
+    /**
+     * 从群中获取发送者成员
+     * @param accountGroupMemberList
+     * @param id
+     * @return
+     */
+    private AccountGroupMember getAccountGroupMember(List&lt;AccountGroupMember&gt; accountGroupMemberList,Long id){
+<span class="nc bnc" id="L297" title="All 2 branches missed.">    	for(AccountGroupMember ag : accountGroupMemberList){</span>
+<span class="nc bnc" id="L298" title="All 2 branches missed.">    		if(ag.getMember().getId().longValue() == id.longValue())return ag;</span>
+<span class="nc" id="L299">    	}</span>
+<span class="nc" id="L300">    	return null;		</span>
+    }
+    
+    /**
+     * 消息内容保存到数据库
+     * @param webSocketMsg
+     * @return
+     */
+    private MsgContent saveMsgContent(WebSocketMsg webSocketMsg){
+<span class="nc" id="L309">    	MsgContent msgContent = new MsgContent();</span>
+<span class="nc" id="L310">    	msgContent.setAttachSize(webSocketMsg.getAttachSize());</span>
+<span class="nc" id="L311">    	msgContent.setAttachUrl(webSocketMsg.getAttachUrl());</span>
+<span class="nc" id="L312">    	msgContent.setChatType(webSocketMsg.getChatType());</span>
+<span class="nc" id="L313">    	msgContent.setExtAttr(webSocketMsg.getExtAttr());</span>
+<span class="nc" id="L314">    	msgContent.setFromId(webSocketMsg.getFromId());</span>
+<span class="nc" id="L315">    	msgContent.setMsg(webSocketMsg.getMsg());</span>
+<span class="nc" id="L316">    	msgContent.setMsgType(webSocketMsg.getMsgType());</span>
+<span class="nc" id="L317">    	msgContent.setToId(webSocketMsg.getToId());</span>
+<span class="nc" id="L318">    	return msgContentService.save(msgContent);</span>
+    }
+    
+    /**
+     * 保存消息记录
+     * @param userId
+     * @param msgContent
+     */
+    private void saveMsgLog(Account account,MsgContent msgContent){
+<span class="nc" id="L327">    	MsgLog msgLog = new MsgLog();</span>
+<span class="nc" id="L328">    	msgLog.setAccount(account);</span>
+<span class="nc" id="L329">    	msgLog.setMsgContent(msgContent);</span>
+<span class="nc" id="L330">    	WebSocket webSocket = clients.get(account.getId());</span>
+<span class="nc bnc" id="L331" title="All 2 branches missed.">    	msgLog.setStatus(webSocket == null ? MsgLog.MSG_STATUS_UNREAD : MsgLog.MSG_STATUS_READ);</span>
+<span class="nc" id="L332">    	msgLogService.save(msgLog);</span>
+<span class="nc" id="L333">    }</span>
+    
+    /**
+     * 群发用户上线通知
+     * @param userid
+     */
+    public void onlineNotice(Long userid) {
+		//首先遍历该用户的所有好友
+<span class="nc bnc" id="L341" title="All 2 branches missed.">		for(Friend friend : friendList){</span>
+			//获取在线的好友
+<span class="nc" id="L343">			WebSocket webSocket = clients.get(friend.getFriendAccount().getId());</span>
+<span class="nc bnc" id="L344" title="All 2 branches missed.">			if(webSocket != null){</span>
+				//表示这个好友在线
+<span class="nc" id="L346">				WebSocketMsg webSocketMsg = new WebSocketMsg();</span>
+<span class="nc" id="L347">				webSocketMsg.setMsgType(WebSocketMsg.MSG_TYPE_ONLINE);</span>
+<span class="nc" id="L348">				webSocketMsg.setToId(friend.getFriendAccount().getId());</span>
+<span class="nc" id="L349">				webSocketMsg.setFromId(userid);</span>
+<span class="nc" id="L350">				sendSingleMsg(webSocketMsg);</span>
+			}
+<span class="nc" id="L352">		}</span>
+<span class="nc" id="L353">	}</span>
+    
+    /**
+     * 群发用户下线通知
+     * @param userid
+     */
+    public void offlineNotice(Long userid) {
+    	//首先遍历该用户的所有好友
+<span class="nc bnc" id="L361" title="All 2 branches missed.">    	for(Friend friend : friendList){</span>
+    		//获取在线的好友
+<span class="nc" id="L363">    		WebSocket webSocket = clients.get(friend.getFriendAccount().getId());</span>
+<span class="nc bnc" id="L364" title="All 2 branches missed.">    		if(webSocket != null){</span>
+    			//表示这个好友在线，发送消息
+<span class="nc" id="L366">    			WebSocketMsg webSocketMsg = new WebSocketMsg();</span>
+<span class="nc" id="L367">    			webSocketMsg.setMsgType(WebSocketMsg.MSG_TYPE_OFFLINE);</span>
+<span class="nc" id="L368">    			webSocketMsg.setToId(friend.getFriendAccount().getId());</span>
+<span class="nc" id="L369">    			webSocketMsg.setFromId(userid);</span>
+<span class="nc" id="L370">    			sendSingleMsg(webSocketMsg);</span>
+    		}
+<span class="nc" id="L372">    	}</span>
+<span class="nc" id="L373">    }</span>
+    
+    /**
+     * 刷新好友列表
+     * @param webSocketMsg
+     */
+    public void refreshFriendList(WebSocketMsg webSocketMsg) {
+<span class="nc" id="L380">		String msg = webSocketMsg.getMsg();</span>
+<span class="nc bnc" id="L381" title="All 2 branches missed.">		if(!StringUtils.isEmpty(msg)){</span>
+<span class="nc" id="L382">			String[] split = msg.split(&quot;,&quot;);</span>
+<span class="nc" id="L383">			webSocketMsg.setMsg(&quot;您的好友列表有更新啦，快来看看吧！&quot;);</span>
+<span class="nc bnc" id="L384" title="All 2 branches missed.">			for(String id : split){</span>
+<span class="nc" id="L385">				Long uid = Long.valueOf(id);</span>
+<span class="nc" id="L386">				WebSocket webSocket = clients.get(uid);</span>
+<span class="nc bnc" id="L387" title="All 2 branches missed.">				if(webSocket != null){</span>
+<span class="nc" id="L388">					webSocket.friendList = friendService.findMyFriendList(uid);</span>
+<span class="nc" id="L389">					clients.put(uid, webSocket);</span>
+<span class="nc" id="L390">					webSocket.session.getAsyncRemote().sendText(JSONObject.toJSONString(webSocketMsg));</span>
+				}
+			}
+		}
+		//更新自己的好友列表
+<span class="nc" id="L395">		friendList = friendService.findMyFriendList(userid);</span>
+<span class="nc" id="L396">		session.getAsyncRemote().sendText(JSONObject.toJSONString(webSocketMsg));</span>
+<span class="nc" id="L397">	}</span>
+    
+    @Autowired
+    public void setFriendService(FriendService friendService){
+<span class="nc" id="L401">    	WebSocket.friendService = friendService;</span>
+<span class="nc" id="L402">    }</span>
+    
+    @Autowired
+    public void setMsgContentService(MsgContentService msgContentService){
+<span class="nc" id="L406">    	WebSocket.msgContentService = msgContentService;</span>
+<span class="nc" id="L407">    }</span>
+    
+    @Autowired
+    public void setMsgLogService(MsgLogService msgLogService){
+<span class="nc" id="L411">    	WebSocket.msgLogService = msgLogService;</span>
+<span class="nc" id="L412">    }</span>
+    
+    @Autowired
+    public void setAccountGroupMemberService(AccountGroupMemberService accountGroupMemberService){
+<span class="nc" id="L416">    	WebSocket.accountGroupMemberService = accountGroupMemberService;</span>
+<span class="nc" id="L417">    }</span>
+    
+    @Autowired
+    public void setAccountService(AccountService accountService){
+<span class="nc" id="L421">    	WebSocket.accountService = accountService;</span>
+<span class="nc" id="L422">    }</span>
+    
+    //测试方法
+    public void setFriendList(List&lt;Friend&gt; friendList) {
+<span class="nc" id="L426">        this.friendList = friendList;</span>
+<span class="nc" id="L427">    }</span>
+    public void setUserid(Long userid) {
+<span class="nc" id="L429">        this.userid = userid;</span>
+<span class="nc" id="L430">    }</span>
+    public void setSession(Session session) {
+<span class="nc" id="L432">        this.session = session;</span>
+<span class="nc" id="L433">    }</span>
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.10.202304240956</span></div></body></html>

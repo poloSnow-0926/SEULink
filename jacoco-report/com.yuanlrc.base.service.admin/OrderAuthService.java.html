@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="zh"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>OrderAuthService.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">ChatOnline Coverage Report</a> &gt; <a href="index.source.html" class="el_package">com.yuanlrc.base.service.admin</a> &gt; <span class="el_source">OrderAuthService.java</span></div><h1>OrderAuthService.java</h1><pre class="source lang-java linenums">package com.yuanlrc.base.service.admin;
+
+import java.util.List;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.domain.Sort.Direction;
+import org.springframework.stereotype.Service;
+
+import com.yuanlrc.base.dao.admin.OrderAuthDao;
+import com.yuanlrc.base.entity.admin.OrderAuth;
+
+/**
+ * 后台操作类 数据库操作service
+ * @author Administrator
+ *
+ */
+@Service
+<span class="nc" id="L19">public class OrderAuthService {</span>
+	
+	@Autowired
+	private OrderAuthDao orderAuthDao;
+	
+	/**
+	 * 添加/修改操作日志，当id不为空时，修改，id为空时自动新增一条记录
+	 * @param operaterLog
+	 * @return
+	 */
+	public OrderAuth save(OrderAuth orderAuth){
+<span class="nc" id="L30">		return orderAuthDao.save(orderAuth);</span>
+	}
+	
+	/**
+	 * 获取一条记录
+	 * @return
+	 */
+	public OrderAuth findOne(){
+<span class="nc" id="L38">		List&lt;OrderAuth&gt; findAll = orderAuthDao.findAll(Sort.by(Direction.DESC, &quot;createTime&quot;));</span>
+<span class="nc bnc" id="L39" title="All 4 branches missed.">		if(findAll == null || findAll.size() &lt; 1)return null;</span>
+<span class="nc" id="L40">		return findAll.get(0);</span>
+	}
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.10.202304240956</span></div></body></html>

@@ -1,0 +1,175 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="zh"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>MenuController.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">chatonline</a> &gt; <a href="index.source.html" class="el_package">com.yuanlrc.base.controller.admin</a> &gt; <span class="el_source">MenuController.java</span></div><h1>MenuController.java</h1><pre class="source lang-java linenums">package com.yuanlrc.base.controller.admin;
+
+import java.util.List;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
+
+import com.yuanlrc.base.bean.CodeMsg;
+import com.yuanlrc.base.bean.Result;
+import com.yuanlrc.base.entity.admin.Menu;
+import com.yuanlrc.base.service.admin.MenuService;
+import com.yuanlrc.base.service.admin.OperaterLogService;
+import com.yuanlrc.base.util.MenuUtil;
+import com.yuanlrc.base.util.ValidateEntityUtil;
+
+/**
+ * 后台菜单管理控制器
+ * @author Administrator
+ *
+ */
+@RequestMapping(&quot;/admin/menu&quot;)
+@Controller
+<span class="nc" id="L28">public class MenuController {</span>
+
+	@Autowired
+	private MenuService menuService;
+	
+	@Autowired
+	private OperaterLogService operaterLogService;
+	
+	/**
+	 * 菜单列表展示页面
+	 * @param model
+	 * @return
+	 */
+	@RequestMapping(value=&quot;/list&quot;)
+	public String list(Model model){
+<span class="nc" id="L43">		List&lt;Menu&gt; findAll = menuService.findAll();</span>
+<span class="nc" id="L44">		model.addAttribute(&quot;title&quot;,&quot;菜单列表&quot;);</span>
+<span class="nc" id="L45">		model.addAttribute(&quot;topMenus&quot;,MenuUtil.getTopMenus(findAll));</span>
+<span class="nc" id="L46">		model.addAttribute(&quot;secondMenus&quot;,MenuUtil.getSecondMenus(findAll));</span>
+<span class="nc" id="L47">		model.addAttribute(&quot;thirdMenus&quot;,MenuUtil.getThirdMenus(findAll));</span>
+<span class="nc" id="L48">		return &quot;admin/menu/list&quot;;</span>
+	}
+	
+	/**
+	 * 菜单添加页面
+	 * @param model
+	 * @return
+	 */
+	@RequestMapping(value=&quot;/add&quot;,method=RequestMethod.GET)
+	public String add(Model model){
+<span class="nc" id="L58">		List&lt;Menu&gt; findAll = menuService.findAll();</span>
+<span class="nc" id="L59">		model.addAttribute(&quot;title&quot;,&quot;菜单列表&quot;);</span>
+<span class="nc" id="L60">		model.addAttribute(&quot;topMenus&quot;,MenuUtil.getTopMenus(findAll));</span>
+<span class="nc" id="L61">		model.addAttribute(&quot;secondMenus&quot;,MenuUtil.getSecondMenus(findAll));</span>
+<span class="nc" id="L62">		return &quot;admin/menu/add&quot;;</span>
+	}
+	
+	/**
+	 * 菜单添加提交表单处理
+	 * @param menu
+	 * @return
+	 */
+	@RequestMapping(value=&quot;/add&quot;,method=RequestMethod.POST)
+	@ResponseBody
+	public Result&lt;Boolean&gt; add(Menu menu){
+<span class="nc bnc" id="L73" title="All 2 branches missed.">		if(menu == null){</span>
+<span class="nc" id="L74">			Result.error(CodeMsg.DATA_ERROR);</span>
+		}
+		//用统一验证实体方法验证是否合法
+<span class="nc" id="L77">		CodeMsg validate = ValidateEntityUtil.validate(menu);</span>
+<span class="nc bnc" id="L78" title="All 2 branches missed.">		if(validate.getCode() != CodeMsg.SUCCESS.getCode()){</span>
+<span class="nc" id="L79">			return Result.error(validate);</span>
+		}
+<span class="nc bnc" id="L81" title="All 2 branches missed.">		if(menu.getParent() != null){</span>
+<span class="nc bnc" id="L82" title="All 2 branches missed.">			if(menu.getParent().getId() == null){</span>
+<span class="nc" id="L83">				menu.setParent(null);</span>
+			}
+		}
+		//表示验证都通过，开始添加数据库
+<span class="nc bnc" id="L87" title="All 2 branches missed.">		if(menuService.save(menu) == null){</span>
+<span class="nc" id="L88">			Result.error(CodeMsg.ADMIN_MENU_ADD_ERROR);</span>
+		}
+		//数据库添加操作成功,记录日志
+<span class="nc" id="L91">		operaterLogService.add(&quot;添加菜单信息【&quot; + menu + &quot;】&quot;);</span>
+<span class="nc" id="L92">		return Result.success(true);</span>
+	}
+	
+	/**
+	 * 菜单编辑页面
+	 * @param model
+	 * @param id
+	 * @return
+	 */
+	@RequestMapping(value=&quot;/edit&quot;,method=RequestMethod.GET)
+	public String eidt(Model model,@RequestParam(name=&quot;id&quot;,required=true)Long id){
+<span class="nc" id="L103">		List&lt;Menu&gt; findAll = menuService.findAll();</span>
+<span class="nc" id="L104">		model.addAttribute(&quot;title&quot;,&quot;菜单列表&quot;);</span>
+<span class="nc" id="L105">		model.addAttribute(&quot;topMenus&quot;,MenuUtil.getTopMenus(findAll));</span>
+<span class="nc" id="L106">		model.addAttribute(&quot;secondMenus&quot;,MenuUtil.getSecondMenus(findAll));</span>
+<span class="nc" id="L107">		model.addAttribute(&quot;menu&quot;,menuService.find(id));</span>
+<span class="nc" id="L108">		return &quot;admin/menu/edit&quot;;</span>
+	}
+	
+	/**
+	 * 菜单编辑页面表单提交处理
+	 * @param request
+	 * @param menu
+	 * @return
+	 */
+	@RequestMapping(value=&quot;/edit&quot;,method=RequestMethod.POST)
+	@ResponseBody
+	public Result&lt;Boolean&gt; edit(Menu menu){
+<span class="nc bnc" id="L120" title="All 2 branches missed.">		if(menu == null){</span>
+<span class="nc" id="L121">			Result.error(CodeMsg.DATA_ERROR);</span>
+		}
+<span class="nc bnc" id="L123" title="All 2 branches missed.">		if(menu.getId() == null){</span>
+<span class="nc" id="L124">			Result.error(CodeMsg.ADMIN_MENU_ID_EMPTY);</span>
+		}
+		//用统一验证实体方法验证是否合法
+<span class="nc" id="L127">		CodeMsg validate = ValidateEntityUtil.validate(menu);</span>
+<span class="nc bnc" id="L128" title="All 2 branches missed.">		if(validate.getCode() != CodeMsg.SUCCESS.getCode()){</span>
+<span class="nc" id="L129">			return Result.error(validate);</span>
+		}
+<span class="nc bnc" id="L131" title="All 2 branches missed.">		if(menu.getParent() != null){</span>
+<span class="nc bnc" id="L132" title="All 2 branches missed.">			if(menu.getParent().getId() == null){</span>
+<span class="nc" id="L133">				menu.setParent(null);</span>
+			}
+		}
+<span class="nc" id="L136">		Menu existMenu = menuService.find(menu.getId());</span>
+<span class="nc bnc" id="L137" title="All 2 branches missed.">		if(existMenu == null){</span>
+<span class="nc" id="L138">			Result.error(CodeMsg.ADMIN_MENU_ID_ERROR);</span>
+		}
+		//表示验证都通过，开始添加数据库
+<span class="nc" id="L141">		existMenu.setIcon(menu.getIcon());</span>
+<span class="nc" id="L142">		existMenu.setName(menu.getName());</span>
+<span class="nc" id="L143">		existMenu.setParent(menu.getParent());</span>
+<span class="nc" id="L144">		existMenu.setSort(menu.getSort());</span>
+<span class="nc" id="L145">		existMenu.setUrl(menu.getUrl());</span>
+<span class="nc" id="L146">		existMenu.setButton(menu.isButton());</span>
+<span class="nc" id="L147">		existMenu.setShow(menu.isShow());</span>
+<span class="nc bnc" id="L148" title="All 2 branches missed.">		if(menuService.save(existMenu) == null){</span>
+<span class="nc" id="L149">			Result.error(CodeMsg.ADMIN_MENU_ADD_ERROR);</span>
+		}
+		//数据库添加操作成功,记录日志
+<span class="nc" id="L152">		operaterLogService.add(&quot;编辑菜单信息【&quot; + existMenu + &quot;】&quot;);</span>
+<span class="nc" id="L153">		return Result.success(true);</span>
+	}
+	
+	/**
+	 * 删除菜单信息
+	 * @param request
+	 * @param id
+	 * @return
+	 */
+	@RequestMapping(value=&quot;/delete&quot;,method=RequestMethod.POST)
+	@ResponseBody
+	public Result&lt;Boolean&gt; delete(@RequestParam(name=&quot;id&quot;,required=true)Long id){
+		try {
+<span class="nc" id="L166">			menuService.delete(id);</span>
+<span class="nc" id="L167">		} catch (Exception e) {</span>
+<span class="nc" id="L168">			return Result.error(CodeMsg.ADMIN_MENU_DELETE_ERROR);</span>
+<span class="nc" id="L169">		}</span>
+		//数据库添加操作成功,记录日志
+<span class="nc" id="L171">		operaterLogService.add(&quot;删除菜单信息，菜单ID【&quot; + id + &quot;】&quot;);</span>
+<span class="nc" id="L172">		return Result.success(true);</span>
+	}
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.10.202304240956</span></div></body></html>

@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="zh"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>OrderAuth.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">ChatOnline Coverage Report</a> &gt; <a href="index.source.html" class="el_package">com.yuanlrc.base.entity.admin</a> &gt; <span class="el_source">OrderAuth.java</span></div><h1>OrderAuth.java</h1><pre class="source lang-java linenums">package com.yuanlrc.base.entity.admin;
+/**
+ * 订单验证日志记录表
+ */
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.EntityListeners;
+import javax.persistence.Table;
+
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
+
+import com.yuanlrc.base.annotion.ValidateEntity;
+import com.yuanlrc.base.entity.common.BaseEntity;
+
+
+@Entity
+@Table(name=&quot;ylrc_order_auth&quot;)
+@EntityListeners(AuditingEntityListener.class)
+<span class="nc" id="L19">public class OrderAuth extends BaseEntity{</span>
+	
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
+
+	@ValidateEntity(required=true,requiredLeng=true,minLength=11,maxLength=11,errorRequiredMsg=&quot;手机号不能为空!&quot;,errorMinLengthMsg=&quot;手机号长为11!&quot;,errorMaxLengthMsg=&quot;手机号长度不能大于11!&quot;)
+	@Column(name=&quot;phone&quot;,nullable=false,length=12)
+	private String phone;//手机号
+	
+	@ValidateEntity(required=true,requiredLeng=true,minLength=18,maxLength=18,errorRequiredMsg=&quot;订单号不能为空!&quot;,errorMinLengthMsg=&quot;订单号长度不能小于18!&quot;,errorMaxLengthMsg=&quot;订单号长度不能大于18!&quot;)
+	@Column(name=&quot;order_sn&quot;,unique=true,nullable=false,length=18)
+	private String orderSn;//订单编号
+	
+	@ValidateEntity(required=false)
+	@Column(name=&quot;mac&quot;,length=32)
+	private String mac ;//mac
+
+	public String getPhone() {
+<span class="nc" id="L39">		return phone;</span>
+	}
+
+	public void setPhone(String phone) {
+<span class="nc" id="L43">		this.phone = phone;</span>
+<span class="nc" id="L44">	}</span>
+
+	public String getOrderSn() {
+<span class="nc" id="L47">		return orderSn;</span>
+	}
+
+	public void setOrderSn(String orderSn) {
+<span class="nc" id="L51">		this.orderSn = orderSn;</span>
+<span class="nc" id="L52">	}</span>
+
+	public String getMac() {
+<span class="nc" id="L55">		return mac;</span>
+	}
+
+	public void setMac(String mac) {
+<span class="nc" id="L59">		this.mac = mac;</span>
+<span class="nc" id="L60">	}</span>
+
+	@Override
+	public String toString() {
+<span class="nc" id="L64">		return &quot;OrderAuth [phone=&quot; + phone + &quot;, orderSn=&quot; + orderSn + &quot;, mac=&quot;</span>
+<span class="nc" id="L65">				+ mac + &quot;]&quot;;</span>
+	}
+	
+	
+	
+	
+	
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.10.202304240956</span></div></body></html>

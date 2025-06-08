@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="zh"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>RuntimeConstant.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">ChatOnline Coverage Report</a> &gt; <a href="index.source.html" class="el_package">com.yuanlrc.base.constant</a> &gt; <span class="el_source">RuntimeConstant.java</span></div><h1>RuntimeConstant.java</h1><pre class="source lang-java linenums">package com.yuanlrc.base.constant;
+
+import java.util.Arrays;
+import java.util.List;
+
+/**
+ * 系统运行时的常量
+ * @author Administrator
+ *
+ */
+<span class="nc" id="L11">public class RuntimeConstant {</span>
+
+	//后台登录拦截器无需拦截的url
+<span class="nc" id="L14">	public static List&lt;String&gt; loginExcludePathPatterns = Arrays.asList(</span>
+<span class="nc" id="L15">			&quot;/home/**&quot;,</span>
+<span class="nc" id="L16">			&quot;/system/login&quot;,</span>
+<span class="nc" id="L17">			&quot;/admin/css/**&quot;,</span>
+<span class="nc" id="L18">			&quot;/admin/fonts/**&quot;,</span>
+<span class="nc" id="L19">			&quot;/admin/js/**&quot;,</span>
+<span class="nc" id="L20">			&quot;/admin/images/**&quot;,</span>
+<span class="nc" id="L21">			&quot;/error&quot;,</span>
+<span class="nc" id="L22">			&quot;/webSocket/**&quot;,</span>
+<span class="nc" id="L23">			&quot;/upload/upload_photo&quot;,</span>
+<span class="nc" id="L24">			&quot;/upload/upload_file&quot;,</span>
+<span class="nc" id="L25">			&quot;/download/download_file&quot;,</span>
+<span class="nc" id="L26">			&quot;/photo/view&quot;,</span>
+<span class="nc" id="L27">			&quot;/system/auth_order&quot;,</span>
+<span class="nc" id="L28">			&quot;/cpacha/generate_cpacha&quot;</span>
+		);
+	//后台权限拦截器无需拦截的url
+<span class="nc" id="L31">	public static List&lt;String&gt; authorityExcludePathPatterns = Arrays.asList(</span>
+<span class="nc" id="L32">			&quot;/home/**&quot;,</span>
+<span class="nc" id="L33">			&quot;/system/login&quot;,</span>
+<span class="nc" id="L34">			&quot;/system/auth_order&quot;,</span>
+<span class="nc" id="L35">			&quot;/system/index&quot;,</span>
+<span class="nc" id="L36">			&quot;/system/no_right&quot;,</span>
+<span class="nc" id="L37">			&quot;/admin/css/**&quot;,</span>
+<span class="nc" id="L38">			&quot;/admin/fonts/**&quot;,</span>
+<span class="nc" id="L39">			&quot;/admin/js/**&quot;,</span>
+<span class="nc" id="L40">			&quot;/admin/images/**&quot;,</span>
+<span class="nc" id="L41">			&quot;/error&quot;,</span>
+<span class="nc" id="L42">			&quot;/cpacha/generate_cpacha&quot;,</span>
+<span class="nc" id="L43">			&quot;/system/logout&quot;,</span>
+<span class="nc" id="L44">			&quot;/system/update_userinfo&quot;,</span>
+<span class="nc" id="L45">			&quot;/system/update_pwd&quot;,</span>
+<span class="nc" id="L46">			&quot;/webSocket/**&quot;,</span>
+<span class="nc" id="L47">			&quot;/upload/upload_photo&quot;,</span>
+<span class="nc" id="L48">			&quot;/upload/upload_file&quot;,</span>
+<span class="nc" id="L49">			&quot;/download/download_file&quot;,</span>
+<span class="nc" id="L50">			&quot;/photo/view&quot;</span>
+		);
+	//前台登录拦截器无需拦截的url
+<span class="nc" id="L53">	public static List&lt;String&gt; homeLoginExcludePathPatterns = Arrays.asList(</span>
+<span class="nc" id="L54">			&quot;/admin/**&quot;,</span>
+<span class="nc" id="L55">			&quot;/home/index/**&quot;,</span>
+<span class="nc" id="L56">			&quot;/system/auth_order&quot;,</span>
+<span class="nc" id="L57">			&quot;/home/css/**&quot;,</span>
+<span class="nc" id="L58">			&quot;/home/fonts/**&quot;,</span>
+<span class="nc" id="L59">			&quot;/home/js/**&quot;,</span>
+<span class="nc" id="L60">			&quot;/home/images/**&quot;,</span>
+<span class="nc" id="L61">			&quot;/home/layer/**&quot;,</span>
+<span class="nc" id="L62">			&quot;/home/plugins/**&quot;,</span>
+<span class="nc" id="L63">			&quot;/home/audio/**&quot;,</span>
+<span class="nc" id="L64">			&quot;/system/**&quot;,</span>
+<span class="nc" id="L65">			&quot;/error&quot;,</span>
+<span class="nc" id="L66">			&quot;/webSocket/**&quot;,</span>
+<span class="nc" id="L67">			&quot;/photo/view&quot;,</span>
+<span class="nc" id="L68">			&quot;/download/download_file&quot;,</span>
+<span class="nc" id="L69">			&quot;/upload/upload_photo&quot;,</span>
+<span class="nc" id="L70">			&quot;/cpacha/generate_cpacha&quot;</span>
+	);
+	//前台全局拦截器无需拦截的url
+<span class="nc" id="L73">	public static List&lt;String&gt; homeGlobalExcludePathPatterns = Arrays.asList(</span>
+<span class="nc" id="L74">			&quot;/admin/**&quot;,</span>
+<span class="nc" id="L75">			&quot;/home/index/**&quot;,</span>
+<span class="nc" id="L76">			&quot;/system/auth_order&quot;,</span>
+<span class="nc" id="L77">			&quot;/home/css/**&quot;,</span>
+<span class="nc" id="L78">			&quot;/home/fonts/**&quot;,</span>
+<span class="nc" id="L79">			&quot;/home/js/**&quot;,</span>
+<span class="nc" id="L80">			&quot;/home/images/**&quot;,</span>
+<span class="nc" id="L81">			&quot;/home/layer/**&quot;,</span>
+<span class="nc" id="L82">			&quot;/home/plugins/**&quot;,</span>
+<span class="nc" id="L83">			&quot;/home/audio/**&quot;,</span>
+<span class="nc" id="L84">			&quot;/system/**&quot;,</span>
+<span class="nc" id="L85">			&quot;/error&quot;,</span>
+<span class="nc" id="L86">			&quot;/webSocket/**&quot;,</span>
+<span class="nc" id="L87">			&quot;/photo/view&quot;,</span>
+<span class="nc" id="L88">			&quot;/upload/upload_photo&quot;,</span>
+<span class="nc" id="L89">			&quot;/download/download_file&quot;,</span>
+<span class="nc" id="L90">			&quot;/cpacha/generate_cpacha&quot;</span>
+<span class="nc" id="L91">	);</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.10.202304240956</span></div></body></html>

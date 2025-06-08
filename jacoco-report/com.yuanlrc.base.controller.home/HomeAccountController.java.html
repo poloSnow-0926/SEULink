@@ -1,0 +1,543 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="zh"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>HomeAccountController.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">ChatOnline Coverage Report</a> &gt; <a href="index.source.html" class="el_package">com.yuanlrc.base.controller.home</a> &gt; <span class="el_source">HomeAccountController.java</span></div><h1>HomeAccountController.java</h1><pre class="source lang-java linenums">package com.yuanlrc.base.controller.home;
+
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+
+import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
+
+import com.yuanlrc.base.bean.CodeMsg;
+import com.yuanlrc.base.bean.PageBean;
+import com.yuanlrc.base.bean.Result;
+import com.yuanlrc.base.bean.WebSocketMsg;
+import com.yuanlrc.base.constant.SessionConstant;
+import com.yuanlrc.base.entity.common.Account;
+import com.yuanlrc.base.entity.common.AccountGroup;
+import com.yuanlrc.base.entity.common.AccountGroupMember;
+import com.yuanlrc.base.entity.common.Friend;
+import com.yuanlrc.base.entity.home.FriendRequest;
+import com.yuanlrc.base.server.home.WebSocket;
+import com.yuanlrc.base.service.admin.OperaterLogService;
+import com.yuanlrc.base.service.common.AccountGroupMemberService;
+import com.yuanlrc.base.service.common.AccountGroupService;
+import com.yuanlrc.base.service.common.AccountService;
+import com.yuanlrc.base.service.common.FriendService;
+import com.yuanlrc.base.service.home.FriendRequestService;
+import com.yuanlrc.base.util.SessionUtil;
+import com.yuanlrc.base.util.StringUtil;
+import com.yuanlrc.base.util.ValidateEntityUtil;
+
+/**
+ * 前台首页控制器
+ * @author Administrator
+ *
+ */
+@RequestMapping(&quot;/home/account&quot;)
+@Controller
+<span class="nc" id="L46">public class HomeAccountController {</span>
+
+	@Autowired
+	private AccountService accountService;
+	
+	@Autowired
+	private FriendRequestService friendRequestService;
+	
+	@Autowired
+	private FriendService friendService;
+	
+	@Autowired
+	private AccountGroupService accountGroupService;
+	
+	@Autowired
+	private AccountGroupMemberService accountGroupMemberService;
+	
+	@Autowired
+	private OperaterLogService operaterLogService;
+	
+<span class="nc" id="L66">	private Logger log = LoggerFactory.getLogger(HomeAccountController.class);</span>
+	/**
+	 * 用户中心主页
+	 * @param name
+	 * @param model
+	 * @return
+	 */
+	@RequestMapping(value=&quot;/index&quot;,method=RequestMethod.GET)
+	public String index(Model model){
+<span class="nc" id="L75">		return &quot;home/account/index&quot;;</span>
+	}
+	
+	/**
+	 * 好友列表
+	 * @param model
+	 * @return
+	 */
+	@RequestMapping(value=&quot;/friend_list&quot;)
+	public String friendRequestList(Model model,@RequestParam(name=&quot;from&quot;,defaultValue=&quot;0&quot;)Integer from){
+<span class="nc" id="L85">		Account onlineAccount = (Account)SessionUtil.get(SessionConstant.SESSION_ACCOUNT_LOGIN_KEY);</span>
+		//防止数据库session失效，重新查询
+<span class="nc" id="L87">		List&lt;Friend&gt; friendList = friendService.findMyFriendList(onlineAccount.getId());</span>
+<span class="nc" id="L88">		model.addAttribute(&quot;friendList&quot;, friendList);</span>
+<span class="nc" id="L89">		model.addAttribute(&quot;from&quot;, from);</span>
+<span class="nc" id="L90">		model.addAttribute(&quot;accountGroupMemberList&quot;, accountGroupMemberService.findByMember(onlineAccount.getId()));</span>
+<span class="nc" id="L91">		return &quot;home/account/friend_list&quot;;</span>
+	}
+	
+	/**
+	 * 查看群信息
+	 * @param model
+	 * @param id
+	 * @return
+	 */
+	@RequestMapping(value=&quot;/view_group_info&quot;)
+	public String viewGroupInfo(Model model,Long id){
+<span class="nc" id="L102">		model.addAttribute(&quot;accountGroupMemberList&quot;, accountGroupMemberService.findByGroup(id));</span>
+<span class="nc" id="L103">		model.addAttribute(&quot;accountGroup&quot;, accountGroupService.findById(id));</span>
+<span class="nc" id="L104">		return &quot;home/account/group_info&quot;;</span>
+	}
+	
+	/**
+	 * 会话列表页面
+	 * @param model
+	 * @return
+	 */
+	@RequestMapping(value=&quot;/group_member_list&quot;)
+	public String groupChattList(Model model,Long accountGroupId,@RequestParam(name=&quot;from&quot;,defaultValue=&quot;0&quot;)Integer from){
+<span class="nc" id="L114">		Account onlineAccount = (Account)SessionUtil.get(SessionConstant.SESSION_ACCOUNT_LOGIN_KEY);</span>
+		//model.addAttribute(&quot;chatGroupList&quot;, accountGroupService.findMyAllChatGroups(onlineAccount.getId()));
+		if(accountGroupId == null){
+		}
+		//获取群成员
+<span class="nc" id="L119">		List&lt;AccountGroupMember&gt; findByGroup = accountGroupMemberService.findByGroup(accountGroupId);</span>
+<span class="nc bnc" id="L120" title="All 2 branches missed.">		if(from ==0){</span>
+			//获取好友列表,用于添加群成员
+<span class="nc" id="L122">			List&lt;Friend&gt; friendList = friendService.findMyFriendList(onlineAccount.getId());</span>
+<span class="nc" id="L123">			model.addAttribute(&quot;friendList&quot;, friendList);</span>
+<span class="nc" id="L124">			List&lt;Long&gt; groupMemberIds = new ArrayList&lt;Long&gt;();</span>
+<span class="nc bnc" id="L125" title="All 2 branches missed.">			for(AccountGroupMember accountGroupMember : findByGroup){</span>
+<span class="nc" id="L126">				groupMemberIds.add(accountGroupMember.getMember().getId());</span>
+			}
+<span class="nc" id="L128">			model.addAttribute(&quot;groupMemberIds&quot;, groupMemberIds);</span>
+		}
+<span class="nc bnc" id="L130" title="All 2 branches missed.">		if(from == 1){</span>
+			//表示移除群成员
+<span class="nc" id="L132">			model.addAttribute(&quot;accountGroupMemberList&quot;, findByGroup);</span>
+		}
+<span class="nc" id="L134">		model.addAttribute(&quot;from&quot;, from);</span>
+<span class="nc" id="L135">		return &quot;home/account/group_member_list&quot;;</span>
+	}
+	
+	/**
+	 * 修改个人信息
+	 * @param account
+	 * @return
+	 */
+	@RequestMapping(value=&quot;/update_user_info&quot;,method=RequestMethod.POST)
+	@ResponseBody
+	public Result&lt;Boolean&gt; updateUserInfo(Account account){
+<span class="nc bnc" id="L146" title="All 2 branches missed.">		if(account == null){</span>
+<span class="nc" id="L147">			return Result.error(CodeMsg.DATA_ERROR);</span>
+		}
+<span class="nc" id="L149">		Account onlineAccount = (Account)SessionUtil.get(SessionConstant.SESSION_ACCOUNT_LOGIN_KEY);</span>
+<span class="nc bnc" id="L150" title="All 2 branches missed.">		if(!StringUtils.isEmpty(account.getPassword())){</span>
+<span class="nc" id="L151">			onlineAccount.setPassword(account.getPassword());</span>
+<span class="nc" id="L152">		}else {</span>
+<span class="nc" id="L153">			account.setPassword(onlineAccount.getPassword());</span>
+		}
+		//用统一验证实体方法验证是否合法
+<span class="nc" id="L156">		CodeMsg validate = ValidateEntityUtil.validate(account);</span>
+<span class="nc bnc" id="L157" title="All 2 branches missed.">		if(validate.getCode() != CodeMsg.SUCCESS.getCode()){</span>
+<span class="nc" id="L158">			return Result.error(validate);</span>
+		}
+		//检查用户名是否重复
+<span class="nc bnc" id="L161" title="All 2 branches missed.">		if(accountService.isExistUsername(account.getUsername(), onlineAccount.getId())){</span>
+<span class="nc" id="L162">			return Result.error(CodeMsg.ACCOUNT_USERNAME_EXIST);</span>
+		}
+<span class="nc" id="L164">		onlineAccount = accountService.find(onlineAccount.getId());</span>
+<span class="nc" id="L165">		onlineAccount.setChatStatus(account.getChatStatus());</span>
+<span class="nc" id="L166">		onlineAccount.setEmail(account.getEmail());</span>
+<span class="nc" id="L167">		onlineAccount.setHeadPic(account.getHeadPic());</span>
+<span class="nc" id="L168">		onlineAccount.setInfo(account.getInfo());</span>
+<span class="nc" id="L169">		onlineAccount.setUsername(account.getUsername());</span>
+<span class="nc" id="L170">		onlineAccount.setSex(account.getSex());</span>
+<span class="nc" id="L171">		onlineAccount.setMobile(account.getMobile());</span>
+<span class="nc bnc" id="L172" title="All 2 branches missed.">		if(!StringUtils.isEmpty(account.getPassword())){</span>
+<span class="nc" id="L173">			onlineAccount.setPassword(account.getPassword());</span>
+		}
+<span class="nc bnc" id="L175" title="All 2 branches missed.">		if(accountService.save(onlineAccount) == null){</span>
+<span class="nc" id="L176">			return Result.error(CodeMsg.HANDLE_ERROR);</span>
+		}
+<span class="nc" id="L178">		SessionUtil.set(SessionConstant.SESSION_ACCOUNT_LOGIN_KEY,onlineAccount);</span>
+<span class="nc" id="L179">		operaterLogService.add(&quot;用户【&quot;+account.getUsername()+&quot;】于【&quot; + StringUtil.getFormatterDate(new Date(), &quot;yyyy-MM-dd HH:mm:ss&quot;) + &quot;】修改个人信息！&quot;);</span>
+<span class="nc" id="L180">		log.info(&quot;用户成功修改个人信息，user = &quot; + onlineAccount.getUsername());</span>
+		//此处判断是否设置下线或隐身
+<span class="nc bnc" id="L182" title="All 2 branches missed.">		if(!Account.ACOUNT_CHAT_STATUS_ONLINE.equals(account.getChatStatus())){</span>
+			//通知其好友下线
+<span class="nc" id="L184">			WebSocket webSocket = WebSocket.clients.get(onlineAccount.getId());</span>
+<span class="nc bnc" id="L185" title="All 2 branches missed.">			if(webSocket != null){</span>
+<span class="nc" id="L186">				webSocket.offlineNotice(onlineAccount.getId());</span>
+			}
+<span class="nc" id="L188">		}else{</span>
+			//通知其好友上线
+<span class="nc" id="L190">			WebSocket webSocket = WebSocket.clients.get(onlineAccount.getId());</span>
+<span class="nc bnc" id="L191" title="All 2 branches missed.">			if(webSocket != null){</span>
+<span class="nc" id="L192">				webSocket.onlineNotice(onlineAccount.getId());</span>
+			}
+		}
+<span class="nc" id="L195">		return Result.success(true);</span>
+	}
+	
+	/**
+	 * 根据用户名搜索
+	 * @param model
+	 * @param account
+	 * @param pageBean
+	 * @return
+	 */
+	@RequestMapping(value=&quot;/search_user_list&quot;)
+	public String search(Model model,Account account,PageBean&lt;Account&gt; pageBean){
+<span class="nc" id="L207">		Account onlineAccount = (Account)SessionUtil.get(SessionConstant.SESSION_ACCOUNT_LOGIN_KEY);</span>
+		//防止数据库session失效，重新查询
+<span class="nc" id="L209">		List&lt;Friend&gt; friendList = friendService.findMyFriendList(onlineAccount.getId());</span>
+<span class="nc" id="L210">		List&lt;Long&gt; friendIds = new ArrayList&lt;Long&gt;();</span>
+<span class="nc bnc" id="L211" title="All 2 branches missed.">		for(Friend friend : friendList){</span>
+<span class="nc" id="L212">			friendIds.add(friend.getFriendAccount().getId());</span>
+		}
+<span class="nc" id="L214">		model.addAttribute(&quot;friendIds&quot;, friendIds);</span>
+<span class="nc" id="L215">		model.addAttribute(&quot;title&quot;, &quot;用户搜索列表&quot;);</span>
+<span class="nc" id="L216">		model.addAttribute(&quot;username&quot;, account.getUsername());</span>
+<span class="nc" id="L217">		pageBean.setPageSize(999);</span>
+<span class="nc" id="L218">		model.addAttribute(&quot;pageBean&quot;, accountService.findList(account, pageBean));</span>
+<span class="nc" id="L219">		return &quot;home/account/search_user_list&quot;;</span>
+	}
+	
+	/**
+	 * 批量发送好友验证
+	 * @param accountIds
+	 * @param remark
+	 * @return
+	 */
+	@RequestMapping(value=&quot;/add_friend_request&quot;,method=RequestMethod.POST)
+	@ResponseBody
+	public Result&lt;Boolean&gt; addFriendRequest(@RequestParam(name=&quot;accountIds&quot;,required=true)String accountIds,String remark){
+<span class="nc" id="L231">		String[] split = accountIds.split(&quot;,&quot;);</span>
+<span class="nc" id="L232">		Account sender = (Account)SessionUtil.get(SessionConstant.SESSION_ACCOUNT_LOGIN_KEY);</span>
+<span class="nc bnc" id="L233" title="All 2 branches missed.">		for(String id : split){</span>
+			//检查发送请求的接受者是否已经是好友
+<span class="nc" id="L235">			List&lt;Friend&gt; friendList = friendService.findMyFriendList(sender.getId());</span>
+<span class="nc bnc" id="L236" title="All 2 branches missed.">			if(isExist(friendList, Long.valueOf(id))){</span>
+				//表示已经存在,跳过
+<span class="nc" id="L238">				continue;</span>
+			}
+<span class="nc" id="L240">			Account reciever = new Account();</span>
+<span class="nc" id="L241">			reciever.setId(Long.valueOf(id));</span>
+<span class="nc" id="L242">			FriendRequest findBySenderAndReciever = friendRequestService.findBySenderAndReciever(sender, reciever);</span>
+<span class="nc bnc" id="L243" title="All 2 branches missed.">			if(findBySenderAndReciever == null){</span>
+<span class="nc" id="L244">				findBySenderAndReciever = new FriendRequest();</span>
+<span class="nc" id="L245">				findBySenderAndReciever.setSender(sender);</span>
+<span class="nc" id="L246">				findBySenderAndReciever.setReciever(reciever);</span>
+			}
+<span class="nc" id="L248">			findBySenderAndReciever.setRemark(remark);</span>
+<span class="nc" id="L249">			findBySenderAndReciever.setStatus(FriendRequest.FRIEND_REQUEST_STATUS_WAITING);</span>
+<span class="nc" id="L250">			friendRequestService.save(findBySenderAndReciever);</span>
+		}
+<span class="nc" id="L252">		return Result.success(true);</span>
+	}
+	
+	/**
+	 * 获取好友请求列表
+	 * @param model
+	 * @return
+	 */
+	@RequestMapping(value=&quot;/friend_request_list&quot;)
+	public String newFriendRequestList(Model model){
+<span class="nc" id="L262">		Account reciever = (Account)SessionUtil.get(SessionConstant.SESSION_ACCOUNT_LOGIN_KEY);</span>
+<span class="nc" id="L263">		model.addAttribute(&quot;title&quot;, &quot;加好友请求列表&quot;);</span>
+<span class="nc" id="L264">		model.addAttribute(&quot;friendRequestList&quot;, friendRequestService.findByReciever(reciever));</span>
+<span class="nc" id="L265">		return &quot;home/account/friend_request_list&quot;;</span>
+	}
+	
+	/**
+	 * 获取新的好友请求数
+	 * @return
+	 */
+	@RequestMapping(value=&quot;/get_new_friend_request_count&quot;,method=RequestMethod.POST)
+	@ResponseBody
+	public Result&lt;Integer&gt; getNewFriendRequestCount(){
+<span class="nc" id="L275">		Account reciever = (Account)SessionUtil.get(SessionConstant.SESSION_ACCOUNT_LOGIN_KEY);</span>
+<span class="nc" id="L276">		return Result.success(friendRequestService.getNewFriendRequestCount(reciever.getId()));</span>
+	}
+	
+	/**
+	 * 批量处理好友请求
+	 * @param friendRequestIds
+	 * @param status
+	 * @return
+	 */
+	@RequestMapping(value=&quot;/handle_friend_request&quot;,method=RequestMethod.POST)
+	@ResponseBody
+	public Result&lt;Boolean&gt; handleFriendRequest(@RequestParam(name=&quot;friendRequestIds&quot;,required=true)String friendRequestIds,Integer status){
+<span class="nc" id="L288">		String[] split = friendRequestIds.split(&quot;,&quot;);</span>
+<span class="nc" id="L289">		Account reciever = (Account)SessionUtil.get(SessionConstant.SESSION_ACCOUNT_LOGIN_KEY);</span>
+		//获取好友列表
+<span class="nc" id="L291">		List&lt;Friend&gt; recieverFriendList = friendService.findMyFriendList(reciever.getId());</span>
+<span class="nc bnc" id="L292" title="All 2 branches missed.">		for(String id : split){</span>
+			//friendRequestService
+<span class="nc" id="L294">			FriendRequest friendRequest = friendRequestService.find(Long.valueOf(id));</span>
+<span class="nc" id="L295">			friendRequest.setStatus(status);</span>
+<span class="nc bnc" id="L296" title="All 2 branches missed.">			if(status == FriendRequest.FRIEND_REQUEST_STATUS_AGREE){</span>
+				//通过好友，添加到自己的通讯录
+<span class="nc" id="L298">				addFriend(recieverFriendList, reciever,friendRequest.getSender());</span>
+				//把自己添加到对方通讯录
+<span class="nc" id="L300">				List&lt;Friend&gt; senderFriendList = friendService.findMyFriendList(friendRequest.getSender().getId());</span>
+<span class="nc" id="L301">				addFriend(senderFriendList,friendRequest.getSender(), reciever);</span>
+			}
+<span class="nc" id="L303">			friendRequestService.save(friendRequest);</span>
+		}
+<span class="nc" id="L305">		return Result.success(true);</span>
+	}
+	
+	/**
+	 * 创建群组
+	 * @param accountGroup
+	 * @return
+	 */
+	@RequestMapping(value=&quot;/create_group_chat&quot;,method=RequestMethod.POST)
+	@ResponseBody
+	public Result&lt;Boolean&gt; createGroupChat(AccountGroup accountGroup,@RequestParam(name=&quot;aids&quot;,required=true)String aids){
+<span class="nc" id="L316">		Account onlineAccount = (Account)SessionUtil.get(SessionConstant.SESSION_ACCOUNT_LOGIN_KEY);</span>
+		//多人
+<span class="nc" id="L318">		String[] split = aids.split(&quot;,&quot;);</span>
+<span class="nc bnc" id="L319" title="All 2 branches missed.">		if(split.length &lt; AccountGroup.GROUP_MIN_PEOPLE){</span>
+<span class="nc" id="L320">			CodeMsg ret = CodeMsg.DATA_ERROR;</span>
+<span class="nc" id="L321">			ret.setMsg(&quot;建群人数不能少于&quot; + AccountGroup.GROUP_MIN_PEOPLE);</span>
+<span class="nc" id="L322">			return Result.error(ret);</span>
+		}
+<span class="nc bnc" id="L324" title="All 2 branches missed.">		if(split.length &gt; AccountGroup.GROUP_MAX_PEOPLE){</span>
+<span class="nc" id="L325">			CodeMsg ret = CodeMsg.DATA_ERROR;</span>
+<span class="nc" id="L326">			ret.setMsg(&quot;建群人数不能大于&quot; + AccountGroup.GROUP_MAX_PEOPLE);</span>
+<span class="nc" id="L327">			return Result.error(ret);</span>
+		}
+<span class="nc" id="L329">		accountGroup.setAdmin(onlineAccount);</span>
+<span class="nc" id="L330">		accountGroup.setCurPeople(split.length+1);</span>
+<span class="nc" id="L331">		accountGroup = accountGroupService.save(accountGroup);</span>
+<span class="nc bnc" id="L332" title="All 2 branches missed.">		for(String id : split){</span>
+<span class="nc" id="L333">			Account account = accountService.find(Long.valueOf(id));</span>
+<span class="nc" id="L334">			AccountGroupMember accountGroupMember = new AccountGroupMember();</span>
+<span class="nc" id="L335">			accountGroupMember.setMember(account);</span>
+<span class="nc" id="L336">			accountGroupMember.setAccountGroup(accountGroup);</span>
+<span class="nc" id="L337">			accountGroupMember.setNickname(account.getUsername());</span>
+<span class="nc" id="L338">			accountGroupMemberService.save(accountGroupMember);</span>
+		}
+		//群成员中加入自己
+<span class="nc" id="L341">		AccountGroupMember accountGroupMember = new AccountGroupMember();</span>
+<span class="nc" id="L342">		accountGroupMember.setMember(onlineAccount);</span>
+<span class="nc" id="L343">		accountGroupMember.setAccountGroup(accountGroup);</span>
+<span class="nc" id="L344">		accountGroupMember.setNickname(onlineAccount.getUsername());</span>
+<span class="nc" id="L345">		accountGroupMemberService.save(accountGroupMember);</span>
+<span class="nc" id="L346">		return Result.success(true);</span>
+	}
+	
+	/**
+	 * 更新联系人
+	 * @param friend
+	 * @return
+	 */
+	@RequestMapping(value=&quot;/update_friend&quot;,method=RequestMethod.POST)
+	@ResponseBody
+	public Result&lt;Boolean&gt; updateContact(Friend friend){
+<span class="nc" id="L357">		Friend findByAccount = friendService.find(friend.getId());</span>
+<span class="nc" id="L358">		findByAccount.setMsgStatus(friend.getMsgStatus());</span>
+<span class="nc bnc" id="L359" title="All 2 branches missed.">		if(!StringUtils.isEmpty(friend.getRemark())){</span>
+<span class="nc" id="L360">			findByAccount.setRemark(friend.getRemark());</span>
+		}
+<span class="nc" id="L362">		findByAccount.setStatus(friend.getStatus());</span>
+<span class="nc bnc" id="L363" title="All 2 branches missed.">		if(friendService.save(findByAccount) == null){</span>
+<span class="nc" id="L364">			return Result.error(CodeMsg.HANDLE_ERROR);</span>
+		}
+<span class="nc" id="L366">		Account onlineAccount = (Account)SessionUtil.get(SessionConstant.SESSION_ACCOUNT_LOGIN_KEY);</span>
+<span class="nc" id="L367">		WebSocket webSocket = WebSocket.clients.get(onlineAccount.getId());</span>
+<span class="nc bnc" id="L368" title="All 2 branches missed.">		if(webSocket != null){</span>
+<span class="nc" id="L369">			webSocket.refreshFriendList(new WebSocketMsg());</span>
+		}
+<span class="nc" id="L371">		return Result.success(true);</span>
+	}
+	
+	/**
+	 * 修改群信息
+	 * @param accountGroup
+	 * @return
+	 */
+	@RequestMapping(value=&quot;/update_group_info&quot;,method=RequestMethod.POST)
+	@ResponseBody
+	public Result&lt;Boolean&gt; updateGroup(AccountGroup accountGroup){
+<span class="nc" id="L382">		AccountGroup findById = accountGroupService.findById(accountGroup.getId());</span>
+<span class="nc bnc" id="L383" title="All 2 branches missed.">		if(!StringUtils.isEmpty(accountGroup.getInfo())){</span>
+<span class="nc" id="L384">			findById.setInfo(accountGroup.getInfo());</span>
+		}
+<span class="nc bnc" id="L386" title="All 2 branches missed.">		if(!StringUtils.isEmpty(accountGroup.getName())){</span>
+<span class="nc" id="L387">			findById.setName(accountGroup.getName());</span>
+		}
+<span class="nc bnc" id="L389" title="All 2 branches missed.">		if(!StringUtils.isEmpty(accountGroup.getNotice())){</span>
+<span class="nc" id="L390">			findById.setNotice(accountGroup.getNotice());</span>
+		}
+<span class="nc bnc" id="L392" title="All 2 branches missed.">		if(!StringUtils.isEmpty(accountGroup.getPicture())){</span>
+<span class="nc" id="L393">			findById.setPicture(accountGroup.getPicture());</span>
+		}
+<span class="nc" id="L395">		accountGroupService.save(findById);</span>
+<span class="nc" id="L396">		return Result.success(true);</span>
+	}
+	
+	/**
+	 * 解散群聊
+	 * @param accountGroupId
+	 * @return
+	 */
+	@RequestMapping(value=&quot;/delete_group&quot;,method=RequestMethod.POST)
+	@ResponseBody
+	public Result&lt;Boolean&gt; deleteGroup(Long accountGroupId){
+<span class="nc" id="L407">		AccountGroup accountGroup = accountGroupService.findById(accountGroupId);</span>
+<span class="nc" id="L408">		Account onlineAccount = (Account)SessionUtil.get(SessionConstant.SESSION_ACCOUNT_LOGIN_KEY);</span>
+<span class="nc bnc" id="L409" title="All 2 branches missed.">		if(accountGroup != null){</span>
+<span class="nc bnc" id="L410" title="All 2 branches missed.">			if(accountGroup.getAdmin().getId().longValue() != onlineAccount.getId().longValue()){</span>
+<span class="nc" id="L411">				return Result.error(CodeMsg.ACCOUNT_NO_ADMIN);</span>
+			}
+			//删除所有成员
+<span class="nc" id="L414">			accountGroupMemberService.deleteByAccountGroupId(accountGroupId);</span>
+<span class="nc" id="L415">			accountGroupService.delete(accountGroupId);</span>
+		}
+		
+<span class="nc" id="L418">		return Result.success(true);</span>
+	}
+	
+	/**
+	 * 更新群成员
+	 * @param accountGroupId
+	 * @param mids
+	 * @param type
+	 * @return
+	 */
+	@RequestMapping(value=&quot;/update_group_member&quot;,method=RequestMethod.POST)
+	@ResponseBody
+	public Result&lt;Boolean&gt; updateGroup(Long accountGroupId,String mids,@RequestParam(name=&quot;type&quot;,defaultValue=&quot;0&quot;)Integer type){
+<span class="nc bnc" id="L431" title="All 2 branches missed.">		if(!StringUtils.isEmpty(mids)){</span>
+<span class="nc" id="L432">			String[] split = mids.split(&quot;,&quot;);</span>
+<span class="nc" id="L433">			AccountGroup accountGroup = accountGroupService.findById(accountGroupId);</span>
+<span class="nc bnc" id="L434" title="All 2 branches missed.">			if(type == 0){</span>
+				//移除用户
+<span class="nc bnc" id="L436" title="All 2 branches missed.">				for(String id : split){</span>
+<span class="nc" id="L437">					accountGroupMemberService.delete(Long.valueOf(id));</span>
+				}
+<span class="nc bnc" id="L439" title="All 2 branches missed.">				if(accountGroup != null){</span>
+<span class="nc" id="L440">					accountGroup.setCurPeople(accountGroup.getCurPeople() - split.length);</span>
+<span class="nc" id="L441">					accountGroupService.save(accountGroup);</span>
+				}
+			}
+<span class="nc bnc" id="L444" title="All 2 branches missed.">			if(type == 1){</span>
+				//添加用户
+<span class="nc" id="L446">				int num = 0;</span>
+<span class="nc bnc" id="L447" title="All 2 branches missed.">				for(String id : split){</span>
+<span class="nc" id="L448">					AccountGroupMember accountGroupMember = accountGroupMemberService.findByAccountGroupAndMember(accountGroupId, Long.valueOf(id));</span>
+<span class="nc bnc" id="L449" title="All 2 branches missed.">					if(accountGroupMember == null){</span>
+						//表示不在群里，此时加入
+<span class="nc" id="L451">						accountGroupMember = new AccountGroupMember();</span>
+<span class="nc" id="L452">						accountGroupMember.setAccountGroup(accountGroup);</span>
+<span class="nc" id="L453">						Account account = accountService.find(Long.valueOf(id));</span>
+<span class="nc" id="L454">						accountGroupMember.setMember(account);</span>
+<span class="nc" id="L455">						accountGroupMember.setNickname(account.getUsername());</span>
+<span class="nc" id="L456">						accountGroupMemberService.save(accountGroupMember);</span>
+<span class="nc" id="L457">						num++;</span>
+					}
+				}
+<span class="nc bnc" id="L460" title="All 2 branches missed.">				if(accountGroup != null){</span>
+<span class="nc" id="L461">					accountGroup.setCurPeople(accountGroup.getCurPeople() + num);</span>
+<span class="nc" id="L462">					accountGroupService.save(accountGroup);</span>
+				}
+			}
+		}
+<span class="nc" id="L466">		return Result.success(true);</span>
+	}
+	
+	/**
+	 * 设置群成员信息
+	 */
+	@RequestMapping(value=&quot;/update_group_member_info&quot;,method=RequestMethod.POST)
+	@ResponseBody
+	public Result&lt;Boolean&gt; updateGroupMember(Long accountGroupId,AccountGroupMember accountGroupMember){
+<span class="nc" id="L475">		Account onlineAccount = (Account)SessionUtil.get(SessionConstant.SESSION_ACCOUNT_LOGIN_KEY);</span>
+<span class="nc" id="L476">		AccountGroupMember member = accountGroupMemberService.findByAccountGroupAndMember(accountGroupId, onlineAccount.getId());</span>
+<span class="nc bnc" id="L477" title="All 2 branches missed.">		if(!StringUtils.isEmpty(accountGroupMember.getNickname())){</span>
+<span class="nc" id="L478">			member.setNickname(accountGroupMember.getNickname());</span>
+		}
+<span class="nc" id="L480">		member.setMsgStatus(accountGroupMember.getMsgStatus());</span>
+<span class="nc" id="L481">		accountGroupMemberService.save(member);</span>
+<span class="nc" id="L482">		return Result.success(true);</span>
+	}
+	
+	/**
+	 * 删除好友
+	 * @param friendId
+	 * @return
+	 */
+	@RequestMapping(value=&quot;/delete_friend&quot;,method=RequestMethod.POST)
+	@ResponseBody
+	public Result&lt;Boolean&gt; deleteFriend(Long friendId){
+<span class="nc" id="L493">		Account onlineAccount = (Account)SessionUtil.get(SessionConstant.SESSION_ACCOUNT_LOGIN_KEY);</span>
+<span class="nc" id="L494">		Friend friend = friendService.find(friendId);</span>
+<span class="nc bnc" id="L495" title="All 2 branches missed.">		if(friend != null){</span>
+<span class="nc bnc" id="L496" title="All 2 branches missed.">			if(friend.getAccount().getId().longValue() != onlineAccount.getId().longValue()){</span>
+<span class="nc" id="L497">				return Result.error(CodeMsg.ACCOUNT_NO_FRIEND);</span>
+			}
+<span class="nc" id="L499">			friendService.delete(friendId);</span>
+		}
+<span class="nc" id="L501">		return Result.success(true);</span>
+	}
+	
+	/**
+	 * 通过好友，添加成为好友
+	 * @param friendList
+	 * @param friend
+	 */
+	private void addFriend(List&lt;Friend&gt; friendList,Account myAccount,Account friend){
+<span class="nc bnc" id="L510" title="All 2 branches missed.">		for(Friend f : friendList){</span>
+<span class="nc bnc" id="L511" title="All 2 branches missed.">			if(f.getFriendAccount().getId().longValue() == friend.getId().longValue()){</span>
+				//表示已经是好友，跳过
+<span class="nc" id="L513">				return;</span>
+			}
+		}
+		//表示不是好友，需添加成好友
+<span class="nc" id="L517">		Friend contacts = new Friend();</span>
+<span class="nc" id="L518">		contacts.setAccount(myAccount);</span>
+<span class="nc" id="L519">		contacts.setFriendAccount(friend);</span>
+<span class="nc" id="L520">		contacts.setRemark(friend.getUsername());</span>
+<span class="nc" id="L521">		contacts = friendService.save(contacts);</span>
+<span class="nc" id="L522">		friendList.add(contacts);</span>
+<span class="nc" id="L523">	}</span>
+	
+	/**
+	 * 判断是否存在与通讯录中
+	 * @param addressBook
+	 * @param accountId
+	 * @return
+	 */
+	private boolean isExist(List&lt;Friend&gt; addressBook,Long accountId){
+<span class="nc bnc" id="L532" title="All 2 branches missed.">		for(Friend friend : addressBook){</span>
+<span class="nc bnc" id="L533" title="All 2 branches missed.">			if(friend.getFriendAccount().getId().longValue() == accountId.longValue()){</span>
+				//表示已经是好友，跳过
+<span class="nc" id="L535">				return true;</span>
+			}
+		}
+<span class="nc" id="L538">		return false;</span>
+	}
+	
+	
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.10.202304240956</span></div></body></html>

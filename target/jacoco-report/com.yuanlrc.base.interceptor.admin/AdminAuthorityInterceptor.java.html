@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="zh"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>AdminAuthorityInterceptor.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">chatonline</a> &gt; <a href="index.source.html" class="el_package">com.yuanlrc.base.interceptor.admin</a> &gt; <span class="el_source">AdminAuthorityInterceptor.java</span></div><h1>AdminAuthorityInterceptor.java</h1><pre class="source lang-java linenums">package com.yuanlrc.base.interceptor.admin;
+
+import java.io.IOException;
+import java.util.List;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Component;
+import org.springframework.web.servlet.HandlerInterceptor;
+
+import com.alibaba.fastjson.JSON;
+import com.yuanlrc.base.bean.CodeMsg;
+import com.yuanlrc.base.entity.admin.Menu;
+import com.yuanlrc.base.entity.admin.User;
+import com.yuanlrc.base.util.MenuUtil;
+import com.yuanlrc.base.util.SessionUtil;
+import com.yuanlrc.base.util.StringUtil;
+
+/**
+ * 权限统一管理拦截器
+ * @author Administrator
+ *
+ */
+@Component
+<span class="nc" id="L28">public class AdminAuthorityInterceptor implements HandlerInterceptor{</span>
+
+<span class="nc" id="L30">	private Logger log = LoggerFactory.getLogger(AdminAuthorityInterceptor.class);</span>
+	
+	@Override
+	public boolean  preHandle(HttpServletRequest request, HttpServletResponse response, Object handler){
+<span class="nc" id="L34">		String requestURI = request.getRequestURI();</span>
+<span class="nc" id="L35">		User loginedUser = SessionUtil.getLoginedUser();</span>
+<span class="nc" id="L36">		log.info(&quot;进入权限控制拦截器&quot; + requestURI);</span>
+<span class="nc" id="L37">		List&lt;Menu&gt; authorities = loginedUser.getRole().getAuthorities();</span>
+<span class="nc bnc" id="L38" title="All 2 branches missed.">		if(!MenuUtil.isExistUrl(requestURI, authorities)){</span>
+			//进入这里，表示权限不存在，首先判断是否是ajax请求
+<span class="nc bnc" id="L40" title="All 2 branches missed.">			if(StringUtil.isAjax(request)){</span>
+				//表示是ajax请求
+				try {
+<span class="nc" id="L43">					log.info(&quot;该请求无权限，已ajax方式返回提示，url=&quot; + requestURI);</span>
+<span class="nc" id="L44">					response.setCharacterEncoding(&quot;UTF-8&quot;);</span>
+<span class="nc" id="L45">					response.getWriter().write(JSON.toJSONString(CodeMsg.ADMIN_NO_RIGHT));</span>
+<span class="nc" id="L46">				} catch (IOException e) {</span>
+					// TODO Auto-generated catch block
+<span class="nc" id="L48">					e.printStackTrace();</span>
+<span class="nc" id="L49">				}</span>
+<span class="nc" id="L50">				return false;</span>
+			}
+			//说明是普通的请求，可直接重定向到无权限提示页面
+			try {
+<span class="nc" id="L54">				log.info(&quot;该请求无权限，重定向到无权限提示页面，url=&quot; + requestURI);</span>
+<span class="nc" id="L55">				response.sendRedirect(&quot;/system/no_right&quot;);</span>
+<span class="nc" id="L56">			} catch (IOException e) {</span>
+				// TODO Auto-generated catch block
+<span class="nc" id="L58">				e.printStackTrace();</span>
+<span class="nc" id="L59">			}</span>
+<span class="nc" id="L60">			return false;</span>
+		}
+<span class="nc" id="L62">		log.info(&quot;该请求符合权限要求，放行&quot; + requestURI);</span>
+<span class="nc" id="L63">		return true;</span>
+	}
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.10.202304240956</span></div></body></html>

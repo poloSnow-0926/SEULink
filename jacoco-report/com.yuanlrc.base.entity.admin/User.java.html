@@ -1,0 +1,147 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="zh"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>User.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">ChatOnline Coverage Report</a> &gt; <a href="index.source.html" class="el_package">com.yuanlrc.base.entity.admin</a> &gt; <span class="el_source">User.java</span></div><h1>User.java</h1><pre class="source lang-java linenums">package com.yuanlrc.base.entity.admin;
+
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.EntityListeners;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
+import javax.persistence.Table;
+
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
+
+import com.yuanlrc.base.annotion.ValidateEntity;
+import com.yuanlrc.base.entity.common.BaseEntity;
+
+/**
+ * 后台用户实体类
+ * @author Administrator
+ *
+ */
+@Entity
+@Table(name=&quot;ylrc_user&quot;)
+@EntityListeners(AuditingEntityListener.class)
+<span class="nc" id="L23">public class User extends BaseEntity{</span>
+
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
+	
+	private static final int USER_SEX_MAN = 1;//性别男
+	
+	private static final int USER_SEX_WOMAN = 2;//性别女
+	
+	private static final int USER_SEX_UNKONW = 0;//性别未知
+	
+	public static final int ADMIN_USER_STATUS_ENABLE = 1;//用户状态正常可用
+	public static final int ADMIN_USER_STATUS_UNABLE = 0;//用户状态不可用
+	
+	@ManyToOne
+	@JoinColumn(name=&quot;role_id&quot;)
+	private Role role;//用户所属角色
+	
+	@ValidateEntity(required=true,requiredLeng=true,minLength=4,maxLength=18,errorRequiredMsg=&quot;用户名不能为空!&quot;,errorMinLengthMsg=&quot;用户名长度需大于4!&quot;,errorMaxLengthMsg=&quot;用户名长度不能大于18!&quot;)
+	@Column(name=&quot;username&quot;,nullable=false,length=18,unique=true)
+	private String username;//用户名
+	
+	@ValidateEntity(required=true,requiredLeng=true,minLength=4,maxLength=32,errorRequiredMsg=&quot;密码不能为空！&quot;,errorMinLengthMsg=&quot;密码长度需大于4!&quot;,errorMaxLengthMsg=&quot;密码长度不能大于32!&quot;)
+	@Column(name=&quot;password&quot;,nullable=false,length=32)
+	private String password;//登录密码
+	
+	@ValidateEntity(required=false)
+	@Column(name=&quot;status&quot;,length=1)
+<span class="nc" id="L53">	private int status = ADMIN_USER_STATUS_ENABLE;//用户状态,默认可用</span>
+	
+	@ValidateEntity(required=false)
+	@Column(name=&quot;head_pic&quot;,length=128)
+	private String headPic;//用户头像
+	
+	@ValidateEntity(required=false)
+	@Column(name=&quot;sex&quot;,length=1)
+<span class="nc" id="L61">	private int sex = USER_SEX_UNKONW;//用户性别</span>
+	
+	@ValidateEntity(required=false)
+	@Column(name=&quot;mobile&quot;,length=12)
+	private String mobile;//用户手机号
+	
+	@ValidateEntity(required=false)
+	@Column(name=&quot;email&quot;,length=32)
+	private String email;//用户邮箱
+
+	public String getUsername() {
+<span class="nc" id="L72">		return username;</span>
+	}
+
+	public void setUsername(String username) {
+<span class="nc" id="L76">		this.username = username;</span>
+<span class="nc" id="L77">	}</span>
+
+	public String getPassword() {
+<span class="nc" id="L80">		return password;</span>
+	}
+
+	public void setPassword(String password) {
+<span class="nc" id="L84">		this.password = password;</span>
+<span class="nc" id="L85">	}</span>
+
+	public Role getRole() {
+<span class="nc" id="L88">		return role;</span>
+	}
+
+	public void setRole(Role role) {
+<span class="nc" id="L92">		this.role = role;</span>
+<span class="nc" id="L93">	}</span>
+
+	public int getStatus() {
+<span class="nc" id="L96">		return status;</span>
+	}
+
+	public void setStatus(int status) {
+<span class="nc" id="L100">		this.status = status;</span>
+<span class="nc" id="L101">	}</span>
+
+	public String getHeadPic() {
+<span class="nc" id="L104">		return headPic;</span>
+	}
+
+	public void setHeadPic(String headPic) {
+<span class="nc" id="L108">		this.headPic = headPic;</span>
+<span class="nc" id="L109">	}</span>
+
+	public int getSex() {
+<span class="nc" id="L112">		return sex;</span>
+	}
+
+	public void setSex(int sex) {
+<span class="nc" id="L116">		this.sex = sex;</span>
+<span class="nc" id="L117">	}</span>
+
+	public String getMobile() {
+<span class="nc" id="L120">		return mobile;</span>
+	}
+
+	public void setMobile(String mobile) {
+<span class="nc" id="L124">		this.mobile = mobile;</span>
+<span class="nc" id="L125">	}</span>
+
+	public String getEmail() {
+<span class="nc" id="L128">		return email;</span>
+	}
+
+	public void setEmail(String email) {
+<span class="nc" id="L132">		this.email = email;</span>
+<span class="nc" id="L133">	}</span>
+
+	@Override
+	public String toString() {
+<span class="nc" id="L137">		return &quot;User [role=&quot; + role + &quot;, username=&quot; + username + &quot;, password=&quot;</span>
+<span class="nc" id="L138">				+ password + &quot;, status=&quot; + status + &quot;, headPic=&quot; + headPic</span>
+<span class="nc" id="L139">				+ &quot;, sex=&quot; + sex + &quot;, mobile=&quot; + mobile + &quot;, email=&quot; + email</span>
+<span class="nc" id="L140">				+ &quot;]&quot;;</span>
+	}
+
+	
+	
+	
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.10.202304240956</span></div></body></html>

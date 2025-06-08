@@ -1,0 +1,155 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="zh"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>StringUtil.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">chatonline</a> &gt; <a href="index.source.html" class="el_package">com.yuanlrc.base.util</a> &gt; <span class="el_source">StringUtil.java</span></div><h1>StringUtil.java</h1><pre class="source lang-java linenums">package com.yuanlrc.base.util;
+
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.net.InetAddress;
+import java.net.NetworkInterface;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
+
+import javax.servlet.http.HttpServletRequest;
+
+import com.alibaba.fastjson.JSONObject;
+import com.yuanlrc.base.bean.CodeMsg;
+
+/**
+ * 项目通用工具类
+ * @author Administrator
+ *
+ */
+<span class="nc" id="L26">public class StringUtil {</span>
+	
+	
+	/**
+	 * 返回指定格式的日期字符串
+	 * @param date
+	 * @param formatter
+	 * @return
+	 */
+	public static String getFormatterDate(Date date,String formatter){
+<span class="nc" id="L36">		SimpleDateFormat sdf = new SimpleDateFormat(formatter);</span>
+<span class="nc" id="L37">		return sdf.format(date);</span>
+	}
+	
+	/**
+	 * 判断请求是否是ajax
+	 * @param request
+	 * @return
+	 */
+	public static boolean isAjax(HttpServletRequest request){
+<span class="nc" id="L46">		String header = request.getHeader(&quot;X-Requested-With&quot;);</span>
+<span class="nc bnc" id="L47" title="All 2 branches missed.">		if(&quot;XMLHttpRequest&quot;.equals(header))return true;</span>
+<span class="nc" id="L48">		return false;</span>
+	}
+	
+	/**
+	 * 从流读取字符串
+	 * @param inputStream
+	 * @return
+	 */
+	public static String getStringFromInputStream(InputStream inputStream){
+<span class="nc" id="L57">		String string = &quot;&quot;;</span>
+		try {
+<span class="nc" id="L59">			BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream,&quot;GB2312&quot;));</span>
+<span class="nc" id="L60">			String buf = null;</span>
+			try {
+<span class="nc bnc" id="L62" title="All 2 branches missed.">				while((buf = bufferedReader.readLine()) != null){</span>
+<span class="nc" id="L63">					string += buf;</span>
+				}
+<span class="nc" id="L65">			} catch (Exception e) {</span>
+				// TODO Auto-generated catch block
+<span class="nc" id="L67">				e.printStackTrace();</span>
+			}finally{
+				try {
+<span class="nc" id="L70">					bufferedReader.close();</span>
+<span class="nc" id="L71">				} catch (IOException e) {</span>
+					// TODO Auto-generated catch block
+<span class="nc" id="L73">					e.printStackTrace();</span>
+<span class="nc" id="L74">				}</span>
+			}
+<span class="nc" id="L76">		} catch (Exception e) {</span>
+			// TODO: handle exception
+<span class="nc" id="L78">		}</span>
+<span class="nc" id="L79">		return string;</span>
+	}
+	public static String getMac(){
+<span class="nc" id="L82">		String mac = &quot;&quot;;</span>
+		try {
+<span class="nc" id="L84">			InetAddress localHost = InetAddress.getLocalHost();</span>
+<span class="nc" id="L85">			byte[] hardwareAddress = NetworkInterface.getByInetAddress(localHost).getHardwareAddress();</span>
+<span class="nc" id="L86">			StringBuffer sb = new StringBuffer(&quot;&quot;);</span>
+<span class="nc bnc" id="L87" title="All 2 branches missed.">			for(int i=0; i&lt;hardwareAddress.length; i++) {</span>
+			    //字节转换为整数
+<span class="nc" id="L89">			    int temp = hardwareAddress[i]&amp;0xff;</span>
+<span class="nc" id="L90">			    String str = Integer.toHexString(temp);</span>
+			    //System.out.println(&quot;每8位:&quot;+str);
+<span class="nc bnc" id="L92" title="All 2 branches missed.">			    if(str.length()==1) {</span>
+<span class="nc" id="L93">			      sb.append(&quot;0&quot;+str);</span>
+			    }else {
+<span class="nc" id="L95">			      sb.append(str);</span>
+			    }
+			  }
+<span class="nc" id="L98">			mac = sb.toString();</span>
+<span class="nc" id="L99">		} catch (Exception e) {</span>
+			// TODO Auto-generated catch block
+<span class="nc" id="L101">			e.printStackTrace();</span>
+<span class="nc" id="L102">		}</span>
+<span class="nc" id="L103">		return mac.toUpperCase();</span>
+	}
+	
+	public static boolean authOrder(String orderSn,String phone){
+<span class="nc" id="L107">		Map&lt;String, String&gt; headerParaMap = new HashMap&lt;String, String&gt;();</span>
+<span class="nc" id="L108">		String mac = getMac();</span>
+<span class="nc" id="L109">		String paramToken = DESUtil.encrypt(orderSn, mac+&quot;#&quot;+orderSn+&quot;#&quot;+phone);</span>
+<span class="nc" id="L110">		headerParaMap.put(&quot;paramToken&quot;, paramToken);</span>
+<span class="nc" id="L111">		String timeToken = DESUtil.encrypt(&quot;muyi_ylrc&quot;, System.currentTimeMillis()+&quot;&quot;);</span>
+<span class="nc" id="L112">		headerParaMap.put(&quot;timeToken&quot;, timeToken);</span>
+<span class="nc" id="L113">		String sendPost = HttpUtil.sendPost(&quot;http://120.25.120.129:8081/order_auth/verify&quot;,headerParaMap,&quot;orderSn=&quot;+orderSn+&quot;&amp;phone=&quot;+phone+&quot;&amp;mac=&quot;+mac);</span>
+<span class="nc" id="L114">		JSONObject parseObject = JSONObject.parseObject(sendPost);</span>
+<span class="nc bnc" id="L115" title="All 2 branches missed.">		if(parseObject.getIntValue(&quot;code&quot;) != CodeMsg.SUCCESS.getCode()){</span>
+<span class="nc" id="L116">			return false;</span>
+		}
+<span class="nc" id="L118">		return true;</span>
+	}
+	
+	public static String readFileToString(File file){
+<span class="nc" id="L122">		String string = &quot;&quot;;</span>
+<span class="nc bnc" id="L123" title="All 2 branches missed.">		if(file != null){</span>
+			try {
+<span class="nc" id="L125">				BufferedReader br = new BufferedReader(new FileReader(file));</span>
+<span class="nc" id="L126">			    String line = null;</span>
+<span class="nc bnc" id="L127" title="All 2 branches missed.">			    while ((line = br.readLine()) != null) {</span>
+<span class="nc" id="L128">			    	string += line;</span>
+			    }
+<span class="nc" id="L130">			    br.close();</span>
+<span class="nc" id="L131">			} catch (Exception e) {</span>
+				// TODO: handle exception
+<span class="nc" id="L133">			}</span>
+		}
+<span class="nc" id="L135">		return string;</span>
+	}
+	
+	public static void handleFile(File file){
+<span class="nc bnc" id="L139" title="All 2 branches missed.">		if(file.isDirectory()){</span>
+<span class="nc" id="L140">			File[] listFiles = file.listFiles();</span>
+<span class="nc bnc" id="L141" title="All 2 branches missed.">			for(File f : listFiles){</span>
+<span class="nc" id="L142">				handleFile(f);</span>
+			}
+<span class="nc" id="L144">		}else{</span>
+<span class="nc" id="L145">			file.delete();</span>
+<span class="nc" id="L146">			System.out.println(file.getName());</span>
+		}
+<span class="nc" id="L148">	}</span>
+	
+	public static void main(String[] args){
+		
+		//System.out.println(sendPost);
+<span class="nc" id="L153">	}</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.10.202304240956</span></div></body></html>

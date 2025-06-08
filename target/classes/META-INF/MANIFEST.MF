@@ -1,0 +1,9 @@
+Manifest-Version: 1.0
+Built-By: POLO
+Build-Jdk: 22.0.2
+Implementation-Title: chatonline
+Implementation-Version: 0.0.1-SNAPSHOT
+Implementation-Vendor-Id: com.yuanlrc
+Implementation-URL: http://www.example.com
+Created-By: Maven Integration for Eclipse
+

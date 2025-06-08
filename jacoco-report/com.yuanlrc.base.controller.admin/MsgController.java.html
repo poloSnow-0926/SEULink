@@ -1,0 +1,99 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="zh"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>MsgController.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">ChatOnline Coverage Report</a> &gt; <a href="index.source.html" class="el_package">com.yuanlrc.base.controller.admin</a> &gt; <span class="el_source">MsgController.java</span></div><h1>MsgController.java</h1><pre class="source lang-java linenums">package com.yuanlrc.base.controller.admin;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
+
+import com.yuanlrc.base.bean.MsgVo;
+import com.yuanlrc.base.bean.PageBean;
+import com.yuanlrc.base.bean.Result;
+import com.yuanlrc.base.entity.common.Account;
+import com.yuanlrc.base.entity.common.AccountGroup;
+import com.yuanlrc.base.entity.common.Friend;
+import com.yuanlrc.base.entity.common.MsgContent;
+import com.yuanlrc.base.service.common.AccountGroupService;
+import com.yuanlrc.base.service.common.AccountService;
+import com.yuanlrc.base.service.common.FriendService;
+import com.yuanlrc.base.service.common.MsgContentService;
+import com.yuanlrc.base.service.common.MsgLogService;
+
+/**
+ * 后台消息管理控制器
+ * @author Administrator
+ *
+ */
+@RequestMapping(&quot;/admin/msg&quot;)
+@Controller
+<span class="nc" id="L31">public class MsgController {</span>
+
+	@Autowired
+	private AccountService accountService;
+	
+	@Autowired
+	private FriendService friendService;
+	
+	@Autowired
+	private AccountGroupService accountGroupService;
+	
+	@Autowired
+	private MsgContentService msgContentService;
+	
+	@Autowired
+	private MsgLogService msgLogService;
+	
+	/**
+	 * 消息列表页面
+	 * @param model
+	 * @param msgContent
+	 * @param pageBean
+	 * @return
+	 */
+	@RequestMapping(value=&quot;/list&quot;)
+	public String list(Model model,MsgContent msgContent,PageBean&lt;MsgContent&gt; pageBean){
+<span class="nc" id="L57">		model.addAttribute(&quot;title&quot;, &quot;消息列表&quot;);</span>
+<span class="nc" id="L58">		model.addAttribute(&quot;msg&quot;, msgContent.getMsg());</span>
+<span class="nc" id="L59">		model.addAttribute(&quot;pageBean&quot;, msgContentService.findList(msgContent, pageBean));</span>
+<span class="nc" id="L60">		return &quot;admin/msg_content/list&quot;;</span>
+	}
+	
+	/**
+	 * 查看消息
+	 * @param id
+	 * @return
+	 */
+	@RequestMapping(value=&quot;/view_info&quot;,method=RequestMethod.POST)
+	@ResponseBody
+	public Result&lt;MsgVo&gt; viewInfo(@RequestParam(name=&quot;id&quot;,required=true)Long id,
+			@RequestParam(name=&quot;fromId&quot;,required=true)Long fromId,
+			@RequestParam(name=&quot;toId&quot;,required=true)Long toId,
+			@RequestParam(name=&quot;type&quot;,required=true)String type){
+<span class="nc" id="L74">		MsgVo msgVo = new MsgVo();</span>
+<span class="nc" id="L75">		msgVo.setMsgLogs(msgLogService.findByMsgContentId(id));</span>
+<span class="nc bnc" id="L76" title="All 2 branches missed.">		if(MsgContent.CHAT_TYPE_SINGLE.equals(type)){</span>
+<span class="nc" id="L77">			Friend friend = friendService.find(fromId);</span>
+<span class="nc bnc" id="L78" title="All 2 branches missed.">			if(friend != null){</span>
+<span class="nc" id="L79">				msgVo.setSender(friend.getFriendAccount().getUsername());</span>
+			}
+<span class="nc" id="L81">			Account account = accountService.find(toId);</span>
+<span class="nc bnc" id="L82" title="All 2 branches missed.">			if(account != null){</span>
+<span class="nc" id="L83">				msgVo.setReciever(account.getUsername());</span>
+			}
+<span class="nc" id="L85">			return Result.success(msgVo);</span>
+		}
+		//表示群消息
+<span class="nc" id="L88">		Account account = accountService.find(fromId);</span>
+<span class="nc bnc" id="L89" title="All 2 branches missed.">		if(account != null){</span>
+<span class="nc" id="L90">			msgVo.setSender(account.getUsername());</span>
+		}
+<span class="nc" id="L92">		AccountGroup accountGroup = accountGroupService.findById(toId);</span>
+<span class="nc bnc" id="L93" title="All 2 branches missed.">		if(accountGroup != null){</span>
+<span class="nc" id="L94">			msgVo.setReciever(accountGroup.getName());</span>
+		}
+<span class="nc" id="L96">		return Result.success(msgVo);</span>
+	}
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.10.202304240956</span></div></body></html>

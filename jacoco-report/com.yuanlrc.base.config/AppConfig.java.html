@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="zh"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>AppConfig.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">ChatOnline Coverage Report</a> &gt; <a href="index.source.html" class="el_package">com.yuanlrc.base.config</a> &gt; <span class="el_source">AppConfig.java</span></div><h1>AppConfig.java</h1><pre class="source lang-java linenums">package com.yuanlrc.base.config;
+
+import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.CommandLineRunner;
+import org.springframework.stereotype.Component;
+
+import com.yuanlrc.base.entity.admin.OrderAuth;
+import com.yuanlrc.base.service.admin.OrderAuthService;
+import com.yuanlrc.base.util.StringUtil;
+@Component
+<span class="nc" id="L12">public class AppConfig implements CommandLineRunner {</span>
+	@Autowired
+	private OrderAuthService orderAuthService;
+	
+<span class="nc" id="L16">	public static int ORDER_AUTH = 0;</span>
+	
+	@Override
+	public void run(String... args) throws Exception {
+		//System.out.println(&quot;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;服务启动执行&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&quot;);
+<span class="nc" id="L21">		OrderAuth orderAuth = orderAuthService.findOne();</span>
+<span class="nc bnc" id="L22" title="All 2 branches missed.">		if(orderAuth == null){</span>
+<span class="nc" id="L23">			return;</span>
+		}
+<span class="nc bnc" id="L25" title="All 4 branches missed.">		if(StringUtils.isEmpty(orderAuth.getOrderSn()) || orderAuth.getOrderSn().length() &lt; 8){</span>
+<span class="nc" id="L26">			ORDER_AUTH = -1;</span>
+<span class="nc" id="L27">			return;</span>
+		}
+<span class="nc bnc" id="L29" title="All 2 branches missed.">		if(StringUtil.authOrder(orderAuth.getOrderSn(), orderAuth.getPhone())){</span>
+<span class="nc" id="L30">			ORDER_AUTH = 1;</span>
+<span class="nc" id="L31">		}else{</span>
+<span class="nc" id="L32">			ORDER_AUTH = -1;</span>
+		}
+		
+<span class="nc" id="L35">	}</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.10.202304240956</span></div></body></html>

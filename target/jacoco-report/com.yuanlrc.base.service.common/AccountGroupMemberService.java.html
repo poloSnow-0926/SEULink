@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="zh"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>AccountGroupMemberService.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">chatonline</a> &gt; <a href="index.source.html" class="el_package">com.yuanlrc.base.service.common</a> &gt; <span class="el_source">AccountGroupMemberService.java</span></div><h1>AccountGroupMemberService.java</h1><pre class="source lang-java linenums">package com.yuanlrc.base.service.common;
+import java.util.List;
+
+import org.springframework.beans.factory.annotation.Autowired;
+/**
+ * 聊天会话service
+ */
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import com.yuanlrc.base.dao.common.AccountGroupMemberDao;
+import com.yuanlrc.base.entity.common.AccountGroupMember;
+
+@Service
+<span class="nc" id="L15">public class AccountGroupMemberService {</span>
+
+	@Autowired
+	private AccountGroupMemberDao accountGroupMemberDao;
+	
+	/**
+	 * 新增或编辑群
+	 * @param chatGroup
+	 * @return
+	 */
+	public AccountGroupMember save(AccountGroupMember accountGroupMember){
+<span class="nc" id="L26">		return accountGroupMemberDao.save(accountGroupMember);</span>
+	}
+	
+	/**
+	 * 获取群成员
+	 * @param type
+	 * @param id
+	 * @return
+	 */
+	public List&lt;AccountGroupMember&gt; findByGroup(Long id){
+<span class="nc" id="L36">		return accountGroupMemberDao.findByAccountGroupId(id);</span>
+	}
+	
+	/**
+	 * 获取某个用户参与的所有群
+	 * @param id
+	 * @return
+	 */
+	public List&lt;AccountGroupMember&gt; findByMember(Long id){
+<span class="nc" id="L45">		return accountGroupMemberDao.findByMemberId(id);</span>
+	}
+	
+	/**
+	 * 根据群和用户id查询
+	 * @param accountGroupId
+	 * @param memberId
+	 * @return
+	 */
+	public AccountGroupMember findByAccountGroupAndMember(Long accountGroupId,Long memberId){
+<span class="nc" id="L55">		return accountGroupMemberDao.findByAccountGroupIdAndMemberId(accountGroupId,memberId);</span>
+	}
+	
+	/**
+	 * 根据id删除
+	 * @param id
+	 */
+	public void delete(Long id){
+<span class="nc" id="L63">		accountGroupMemberDao.deleteById(id);</span>
+<span class="nc" id="L64">	}</span>
+	
+	/**
+	 * 根据群id删除
+	 * @param accountGroupId
+	 */
+	@Transactional
+	public void deleteByAccountGroupId(Long accountGroupId){
+<span class="nc" id="L72">		accountGroupMemberDao.deleteByAccountGroupId(accountGroupId);</span>
+<span class="nc" id="L73">	}</span>
+	
+	/**
+	 * 根据id查找
+	 * @param id
+	 * @return
+	 */
+	public AccountGroupMember find(Long id){
+<span class="nc" id="L81">		return accountGroupMemberDao.getOne(id);</span>
+	}
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.10.202304240956</span></div></body></html>

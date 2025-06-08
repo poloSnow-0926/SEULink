@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="zh"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>AdminLoginInterceptor.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">chatonline</a> &gt; <a href="index.source.html" class="el_package">com.yuanlrc.base.interceptor.admin</a> &gt; <span class="el_source">AdminLoginInterceptor.java</span></div><h1>AdminLoginInterceptor.java</h1><pre class="source lang-java linenums">package com.yuanlrc.base.interceptor.admin;
+
+import java.io.IOException;
+import java.util.List;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+import org.springframework.web.servlet.HandlerInterceptor;
+
+import com.alibaba.fastjson.JSON;
+import com.yuanlrc.base.bean.CodeMsg;
+import com.yuanlrc.base.config.AppConfig;
+import com.yuanlrc.base.config.SiteConfig;
+import com.yuanlrc.base.constant.SessionConstant;
+import com.yuanlrc.base.entity.admin.Menu;
+import com.yuanlrc.base.entity.admin.User;
+import com.yuanlrc.base.util.MenuUtil;
+import com.yuanlrc.base.util.StringUtil;
+
+/**
+ * 登录拦截器
+ * @author Administrator
+ *
+ */
+@Component
+<span class="nc" id="L32">public class AdminLoginInterceptor implements HandlerInterceptor{</span>
+
+<span class="nc" id="L34">	private Logger log = LoggerFactory.getLogger(AdminLoginInterceptor.class);</span>
+	@Autowired
+	private SiteConfig siteConfig;
+	
+	@Override
+	public boolean  preHandle(HttpServletRequest request, HttpServletResponse response, Object handler){
+<span class="nc" id="L40">		String requestURI = request.getRequestURI();</span>
+<span class="nc" id="L41">		HttpSession session = request.getSession();</span>
+<span class="nc" id="L42">		session.setAttribute(SessionConstant.SESSION_USER_AUTH_KEY, AppConfig.ORDER_AUTH);</span>
+<span class="nc" id="L43">		Object attribute = session.getAttribute(SessionConstant.SESSION_USER_LOGIN_KEY);</span>
+<span class="nc bnc" id="L44" title="All 2 branches missed.">		if(attribute == null){</span>
+<span class="nc" id="L45">			log.info(&quot;用户还未登录或者session失效,重定向到登录页面,当前URL=&quot; + requestURI);</span>
+			//首先判断是否是ajax请求
+<span class="nc bnc" id="L47" title="All 2 branches missed.">			if(StringUtil.isAjax(request)){</span>
+				//表示是ajax请求
+				try {
+<span class="nc" id="L50">					response.setCharacterEncoding(&quot;UTF-8&quot;);</span>
+<span class="nc" id="L51">					response.getWriter().write(JSON.toJSONString(CodeMsg.USER_SESSION_EXPIRED));</span>
+<span class="nc" id="L52">				} catch (IOException e) {</span>
+					// TODO Auto-generated catch block
+<span class="nc" id="L54">					e.printStackTrace();</span>
+<span class="nc" id="L55">				}</span>
+<span class="nc" id="L56">				return false;</span>
+			}
+			//说明是普通的请求，可直接重定向到登录页面
+			//用户还未登录或者session失效,重定向到登录页面
+			try {
+<span class="nc" id="L61">				response.sendRedirect(&quot;/system/login&quot;);</span>
+<span class="nc" id="L62">			} catch (IOException e) {</span>
+				// TODO Auto-generated catch block
+<span class="nc" id="L64">				e.printStackTrace();</span>
+<span class="nc" id="L65">			}</span>
+<span class="nc" id="L66">			return false;</span>
+		}
+<span class="nc" id="L68">		log.info(&quot;该请求符合登录要求，放行&quot; + requestURI);</span>
+<span class="nc bnc" id="L69" title="All 2 branches missed.">		if(!StringUtil.isAjax(request)){</span>
+			//若不是ajax请求，则将菜单信息放入页面模板变量
+<span class="nc" id="L71">			User user = (User)attribute;</span>
+<span class="nc" id="L72">			List&lt;Menu&gt; authorities = user.getRole().getAuthorities();</span>
+<span class="nc" id="L73">			request.setAttribute(&quot;userTopMenus&quot;, MenuUtil.getTopMenus(authorities));</span>
+<span class="nc" id="L74">			List&lt;Menu&gt; secondMenus = MenuUtil.getSecondMenus(user.getRole().getAuthorities());</span>
+<span class="nc" id="L75">			request.setAttribute(&quot;userSecondMenus&quot;, secondMenus);</span>
+<span class="nc" id="L76">			request.setAttribute(&quot;userThirdMenus&quot;, MenuUtil.getChildren(MenuUtil.getMenuIdByUrl(requestURI,secondMenus),authorities));</span>
+<span class="nc" id="L77">			request.setAttribute(&quot;siteName&quot;, siteConfig.getSiteName());</span>
+<span class="nc" id="L78">			request.setAttribute(&quot;siteUrl&quot;, siteConfig.getSiteUrl());</span>
+		}
+<span class="nc" id="L80">		return true;</span>
+	}
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.10.202304240956</span></div></body></html>

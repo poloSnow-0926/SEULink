@@ -1,0 +1,127 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="zh"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>OperaterLogService.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">chatonline</a> &gt; <a href="index.source.html" class="el_package">com.yuanlrc.base.service.admin</a> &gt; <span class="el_source">OperaterLogService.java</span></div><h1>OperaterLogService.java</h1><pre class="source lang-java linenums">package com.yuanlrc.base.service.admin;
+
+import java.util.List;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Example;
+import org.springframework.data.domain.ExampleMatcher;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.ExampleMatcher.GenericPropertyMatchers;
+import org.springframework.stereotype.Service;
+
+import com.yuanlrc.base.bean.PageBean;
+import com.yuanlrc.base.dao.admin.OperaterLogDao;
+import com.yuanlrc.base.entity.admin.OperaterLog;
+import com.yuanlrc.base.entity.admin.User;
+import com.yuanlrc.base.util.SessionUtil;
+
+/**
+ * 后台操作类 数据库操作service
+ * @author Administrator
+ *
+ */
+@Service
+<span class="nc" id="L26">public class OperaterLogService {</span>
+	
+	@Autowired
+	private OperaterLogDao operaterLogDao;
+	
+	/**
+	 * 添加/修改操作日志，当id不为空时，修改，id为空时自动新增一条记录
+	 * @param operaterLog
+	 * @return
+	 */
+	public OperaterLog save(OperaterLog operaterLog){
+<span class="nc" id="L37">		return operaterLogDao.save(operaterLog);</span>
+	}
+	
+	/**
+	 * 获取指定条数的操作日志列表
+	 * @param size
+	 * @return
+	 */
+	public List&lt;OperaterLog&gt; findLastestLog(int size){
+<span class="nc" id="L46">		return operaterLogDao.findLastestLog(size);</span>
+	}
+	
+	/**
+	 * 根据id查询单条数据
+	 * @param id
+	 * @return
+	 */
+	public OperaterLog findById(Long id){
+<span class="nc" id="L55">		return operaterLogDao.find(id);</span>
+	}
+	
+	/**
+	 * 返回所有的记录
+	 * @return
+	 */
+	public List&lt;OperaterLog&gt; findAll(){
+<span class="nc" id="L63">		return operaterLogDao.findAll();</span>
+	}
+	
+	/**
+	 * 删除单条记录
+	 * @param id
+	 */
+	public void delete(Long id){
+<span class="nc" id="L71">		operaterLogDao.deleteById(id);</span>
+<span class="nc" id="L72">	}</span>
+	
+	/**
+	 * 清空整张表
+	 */
+	public void deleteAll(){
+<span class="nc" id="L78">		operaterLogDao.deleteAll();</span>
+<span class="nc" id="L79">	}</span>
+	
+	/**
+	 * 操作日志添加
+	 * @param operater
+	 * @param content
+	 */
+	public void add(String operater,String content){
+<span class="nc" id="L87">		OperaterLog operaterLog = new OperaterLog();</span>
+<span class="nc" id="L88">		operaterLog.setOperator(operater);</span>
+<span class="nc" id="L89">		operaterLog.setContent(content);</span>
+<span class="nc" id="L90">		save(operaterLog);</span>
+<span class="nc" id="L91">	}</span>
+	
+	/**
+	 * 操作日志添加
+	 * @param content
+	 */
+	public void add(String content){
+<span class="nc" id="L98">		User loginedUser = SessionUtil.getLoginedUser();</span>
+<span class="nc bnc" id="L99" title="All 2 branches missed.">		add(loginedUser == null ? &quot;未知(获取登录用户失败)&quot; : loginedUser.getUsername(), content);</span>
+<span class="nc" id="L100">	}</span>
+	
+	/**
+	 * 分页查找日志
+	 * @param operaterLog
+	 * @param pageBean
+	 * @return
+	 */
+	public PageBean&lt;OperaterLog&gt; findList(OperaterLog operaterLog,PageBean&lt;OperaterLog&gt; pageBean){
+<span class="nc" id="L109">		ExampleMatcher withMatcher = ExampleMatcher.matching().withMatcher(&quot;operator&quot;, GenericPropertyMatchers.contains());</span>
+<span class="nc" id="L110">		Example&lt;OperaterLog&gt; example = Example.of(operaterLog, withMatcher);</span>
+<span class="nc" id="L111">		Pageable pageable = PageRequest.of(pageBean.getCurrentPage()-1, pageBean.getPageSize());</span>
+<span class="nc" id="L112">		Page&lt;OperaterLog&gt; findAll = operaterLogDao.findAll(example, pageable);</span>
+<span class="nc" id="L113">		pageBean.setContent(findAll.getContent());</span>
+<span class="nc" id="L114">		pageBean.setTotal(findAll.getTotalElements());</span>
+<span class="nc" id="L115">		pageBean.setTotalPage(findAll.getTotalPages());</span>
+<span class="nc" id="L116">		return pageBean;</span>
+	}
+	
+	/**
+	 * 操作日志总数
+	 * @return
+	 */
+	public long total(){
+<span class="nc" id="L124">		return operaterLogDao.count();</span>
+	}
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.10.202304240956</span></div></body></html>

@@ -1,0 +1,140 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="zh"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>MsgContent.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">chatonline</a> &gt; <a href="index.source.html" class="el_package">com.yuanlrc.base.entity.common</a> &gt; <span class="el_source">MsgContent.java</span></div><h1>MsgContent.java</h1><pre class="source lang-java linenums">package com.yuanlrc.base.entity.common;
+
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.EntityListeners;
+import javax.persistence.Table;
+
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
+
+/**
+ * 消息内容实体类
+ * @author Administrator
+ *
+ */
+@Entity
+@Table(name=&quot;ylrc_msg_content&quot;)
+@EntityListeners(AuditingEntityListener.class)
+<span class="nc" id="L18">public class MsgContent extends BaseEntity{</span>
+
+/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
+
+	public static final String CHAT_TYPE_SINGLE = &quot;single&quot;;//单人聊天
+	
+	public static final String CHAT_TYPE_GROUP = &quot;group&quot;;//群消息
+	
+	public static final String MSG_TYPE_TEXT = &quot;text&quot;;//文本消息
+	
+	public static final String MSG_TYPE_IMG = &quot;img&quot;;//图片消息
+	
+	public static final String MSG_TYPE_FILE = &quot;file&quot;;//文件消息
+	
+	public static final String MSG_TYPE_VIDEO = &quot;video&quot;;//视频件消息
+	
+	public static final String MSG_TYPE_AUDIO = &quot;audio&quot;;//音频消息
+	
+	@Column(name=&quot;to_id&quot;,nullable=false,length=11)
+	private Long toId;//消息接受者id
+	
+	@Column(name=&quot;from_id&quot;,nullable=false,length=11)
+	private Long fromId;//消息发送者id
+	
+	@Column(name=&quot;chat_type&quot;,length=12)
+	private String chatType;//聊天类型
+	
+	@Column(name=&quot;msg_type&quot;,length=12)
+	private String msgType;//消息类型
+	
+	@Column(name=&quot;content&quot;,length=10240)
+	private String msg;//消息内容
+	
+	@Column(name=&quot;ext_attr&quot;,length=1280)
+	private String extAttr;//消息附加字段
+	
+	@Column(name=&quot;attach_url&quot;,length=512)
+	private String attachUrl;//附件地址
+	
+	@Column(name=&quot;attach_size&quot;,length=12)
+	private long attachSize;//附件大小
+
+	public Long getToId() {
+<span class="nc" id="L64">		return toId;</span>
+	}
+
+	public void setToId(Long toId) {
+<span class="nc" id="L68">		this.toId = toId;</span>
+<span class="nc" id="L69">	}</span>
+
+	public Long getFromId() {
+<span class="nc" id="L72">		return fromId;</span>
+	}
+
+	public void setFromId(Long fromId) {
+<span class="nc" id="L76">		this.fromId = fromId;</span>
+<span class="nc" id="L77">	}</span>
+
+	
+
+	public String getChatType() {
+<span class="nc" id="L82">		return chatType;</span>
+	}
+
+	public void setChatType(String chatType) {
+<span class="nc" id="L86">		this.chatType = chatType;</span>
+<span class="nc" id="L87">	}</span>
+
+	public String getMsgType() {
+<span class="nc" id="L90">		return msgType;</span>
+	}
+
+	public void setMsgType(String msgType) {
+<span class="nc" id="L94">		this.msgType = msgType;</span>
+<span class="nc" id="L95">	}</span>
+
+	public String getMsg() {
+<span class="nc" id="L98">		return msg;</span>
+	}
+
+	public void setMsg(String msg) {
+<span class="nc" id="L102">		this.msg = msg;</span>
+<span class="nc" id="L103">	}</span>
+
+	public String getAttachUrl() {
+<span class="nc" id="L106">		return attachUrl;</span>
+	}
+
+	public void setAttachUrl(String attachUrl) {
+<span class="nc" id="L110">		this.attachUrl = attachUrl;</span>
+<span class="nc" id="L111">	}</span>
+
+	public long getAttachSize() {
+<span class="nc" id="L114">		return attachSize;</span>
+	}
+
+	public void setAttachSize(long attachSize) {
+<span class="nc" id="L118">		this.attachSize = attachSize;</span>
+<span class="nc" id="L119">	}</span>
+
+	public String getExtAttr() {
+<span class="nc" id="L122">		return extAttr;</span>
+	}
+
+	public void setExtAttr(String extAttr) {
+<span class="nc" id="L126">		this.extAttr = extAttr;</span>
+<span class="nc" id="L127">	}</span>
+
+	@Override
+	public String toString() {
+<span class="nc" id="L131">		return &quot;WebSocketMsg [toId=&quot; + toId + &quot;, fromId=&quot; + fromId</span>
+				+ &quot;, chatType=&quot; + chatType + &quot;, msgType=&quot; + msgType + &quot;, msg=&quot;
+				+ msg + &quot;, extAttr=&quot; + extAttr + &quot;, attachUrl=&quot; + attachUrl
+				+ &quot;, attachSize=&quot; + attachSize + &quot;]&quot;;
+	}
+
+	
+	
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.10.202304240956</span></div></body></html>

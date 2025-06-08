@@ -1,0 +1,113 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="zh"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>CodeMsg.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">ChatOnline Coverage Report</a> &gt; <a href="index.source.html" class="el_package">com.yuanlrc.base.bean</a> &gt; <span class="el_source">CodeMsg.java</span></div><h1>CodeMsg.java</h1><pre class="source lang-java linenums">package com.yuanlrc.base.bean;
+/**
+ * 错误码统一处理类，所有的错误码统一定义在这里
+ * @author Administrator
+ *
+ */
+public class CodeMsg {
+
+	private int code;//错误码
+	
+	private String msg;//错误信息
+	
+	/**
+	 * 构造函数私有化即单例模式
+	 * @param code
+	 * @param msg
+	 */
+<span class="nc" id="L18">	private CodeMsg(int code,String msg){</span>
+<span class="nc" id="L19">		this.code = code;</span>
+<span class="nc" id="L20">		this.msg = msg;</span>
+<span class="nc" id="L21">	}</span>
+	
+	public int getCode() {
+<span class="nc" id="L24">		return code;</span>
+	}
+
+
+
+	public void setCode(int code) {
+<span class="nc" id="L30">		this.code = code;</span>
+<span class="nc" id="L31">	}</span>
+
+
+
+	public String getMsg() {
+<span class="nc" id="L36">		return msg;</span>
+	}
+
+
+
+	public void setMsg(String msg) {
+<span class="nc" id="L42">		this.msg = msg;</span>
+<span class="nc" id="L43">	}</span>
+	
+	//通用错误码定义
+	//处理成功消息码
+<span class="nc" id="L47">	public static CodeMsg SUCCESS = new CodeMsg(0, &quot;success&quot;);</span>
+	//非法数据错误码
+<span class="nc" id="L49">	public static CodeMsg DATA_ERROR = new CodeMsg(-1, &quot;非法数据！&quot;);</span>
+<span class="nc" id="L50">	public static CodeMsg CPACHA_EMPTY = new CodeMsg(-2, &quot;验证码不能为空！&quot;);</span>
+<span class="nc" id="L51">	public static CodeMsg VALIDATE_ENTITY_ERROR = new CodeMsg(-3, &quot;&quot;);</span>
+<span class="nc" id="L52">	public static CodeMsg SESSION_EXPIRED = new CodeMsg(-4, &quot;会话已失效，请刷新页面重试！&quot;);</span>
+<span class="nc" id="L53">	public static CodeMsg CPACHA_ERROR = new CodeMsg(-5, &quot;验证码错误！&quot;);</span>
+<span class="nc" id="L54">	public static CodeMsg USER_SESSION_EXPIRED = new CodeMsg(-6, &quot;还未登录或会话失效，请重新登录！&quot;);</span>
+<span class="nc" id="L55">	public static CodeMsg UPLOAD_PHOTO_SUFFIX_ERROR = new CodeMsg(-7, &quot;图片格式不正确！&quot;);</span>
+<span class="nc" id="L56">	public static CodeMsg UPLOAD_PHOTO_ERROR = new CodeMsg(-8, &quot;图片上传错误！&quot;);</span>
+<span class="nc" id="L57">	public static CodeMsg HANDLE_ERROR = new CodeMsg(-9, &quot;操作失败，请联系管理员！&quot;);</span>
+<span class="nc" id="L58">	public static CodeMsg ORDER_SN_ERROR = new CodeMsg(-11, &quot;订单编号错误！&quot;);</span>
+<span class="nc" id="L59">	public static CodeMsg PHONE_ERROR = new CodeMsg(-12, &quot;手机号错误！&quot;);</span>
+<span class="nc" id="L60">	public static CodeMsg ORDER_AUTH_ERROR = new CodeMsg(-13, &quot;\u8ba2\u5355\u9a8c\u8bc1\u5931\u8d25\uff0c\u8ba2\u5355\u7f16\u53f7\u6216\u624b\u673a\u53f7\u8f93\u5165\u6709\u8bef\u6216\u8005\u53ef\u80fd\u4f60\u8d2d\u4e70\u7684\u662f\u76d7\u7248\uff0c\u8bf7\u8054\u7cfb\u3010\u733f\u6765\u5165\u6b64\u3011\u5ba2\u670d\uff01&quot;);</span>
+	
+	
+	//后台管理类错误码
+	//用户管理类错误
+<span class="nc" id="L65">	public static CodeMsg ADMIN_USERNAME_EMPTY = new CodeMsg(-2000, &quot;用户名不能为空！&quot;);</span>
+<span class="nc" id="L66">	public static CodeMsg ADMIN_PASSWORD_EMPTY = new CodeMsg(-2001, &quot;密码不能为空！&quot;);</span>
+<span class="nc" id="L67">	public static CodeMsg ADMIN_NO_RIGHT = new CodeMsg(-2002, &quot;您所属的角色没有该权限！&quot;);</span>
+	
+	//登录类错误码
+<span class="nc" id="L70">	public static CodeMsg ADMIN_USERNAME_NO_EXIST = new CodeMsg(-3000, &quot;该用户名不存在！&quot;);</span>
+<span class="nc" id="L71">	public static CodeMsg ADMIN_PASSWORD_ERROR = new CodeMsg(-3001, &quot;密码错误！&quot;);</span>
+<span class="nc" id="L72">	public static CodeMsg ADMIN_USER_UNABLE = new CodeMsg(-3002, &quot;该用户已被冻结，请联系管理员！&quot;);</span>
+<span class="nc" id="L73">	public static CodeMsg ADMIN_USER_ROLE_UNABLE = new CodeMsg(-3003, &quot;该用户所属角色状态不可用，请联系管理员！&quot;);</span>
+<span class="nc" id="L74">	public static CodeMsg ADMIN_USER_ROLE_AUTHORITES_EMPTY = new CodeMsg(-3004, &quot;该用户所属角色无可用权限，请联系管理员！&quot;);</span>
+	
+	//后台菜单管理类错误码
+<span class="nc" id="L77">	public static CodeMsg ADMIN_MENU_ADD_ERROR = new CodeMsg(-4000, &quot;菜单添加失败，请联系管理员！&quot;);</span>
+<span class="nc" id="L78">	public static CodeMsg ADMIN_MENU_EDIT_ERROR = new CodeMsg(-4001, &quot;菜单编辑失败，请联系管理员！&quot;);</span>
+<span class="nc" id="L79">	public static CodeMsg ADMIN_MENU_ID_EMPTY = new CodeMsg(-4002, &quot;菜单ID不能为空！&quot;);</span>
+<span class="nc" id="L80">	public static CodeMsg ADMIN_MENU_ID_ERROR = new CodeMsg(-4003, &quot;菜单ID错误！&quot;);</span>
+<span class="nc" id="L81">	public static CodeMsg ADMIN_MENU_DELETE_ERROR = new CodeMsg(-4004, &quot;改菜单下有子菜单，不允许删除！&quot;);</span>
+	//后台角色管理类错误码
+<span class="nc" id="L83">	public static CodeMsg ADMIN_ROLE_ADD_ERROR = new CodeMsg(-5000, &quot;角色添加失败，请联系管理员！&quot;);</span>
+<span class="nc" id="L84">	public static CodeMsg ADMIN_ROLE_NO_EXIST = new CodeMsg(-5001, &quot;该角色不存在！&quot;);</span>
+<span class="nc" id="L85">	public static CodeMsg ADMIN_ROLE_EDIT_ERROR = new CodeMsg(-5002, &quot;角色编辑失败，请联系管理员！&quot;);</span>
+<span class="nc" id="L86">	public static CodeMsg ADMIN_ROLE_DELETE_ERROR = new CodeMsg(-5003, &quot;该角色下存在用户信息，不可删除！&quot;);</span>
+	//后台用户管理类错误码
+<span class="nc" id="L88">	public static CodeMsg ADMIN_USER_ROLE_EMPTY = new CodeMsg(-6000, &quot;请选择用户所属角色！&quot;);</span>
+<span class="nc" id="L89">	public static CodeMsg ADMIN_USERNAME_EXIST = new CodeMsg(-6001, &quot;该用户名已存在，请换一个试试！&quot;);</span>
+<span class="nc" id="L90">	public static CodeMsg ADMIN_USE_ADD_ERROR = new CodeMsg(-6002, &quot;用户添加失败，请联系管理员！&quot;);</span>
+<span class="nc" id="L91">	public static CodeMsg ADMIN_USE_NO_EXIST = new CodeMsg(-6003, &quot;用户不存在！&quot;);</span>
+<span class="nc" id="L92">	public static CodeMsg ADMIN_USE_EDIT_ERROR = new CodeMsg(-6004, &quot;用户编辑失败，请联系管理员！&quot;);</span>
+<span class="nc" id="L93">	public static CodeMsg ADMIN_USE_DELETE_ERROR = new CodeMsg(-6005, &quot;该用户存在关联数据，不允许删除！&quot;);</span>
+	
+	//后台用户修改密码类错误码
+<span class="nc" id="L96">	public static CodeMsg ADMIN_USER_UPDATE_PWD_ERROR = new CodeMsg(-7000, &quot;旧密码错误！&quot;);</span>
+<span class="nc" id="L97">	public static CodeMsg ADMIN_USER_UPDATE_PWD_EMPTY = new CodeMsg(-7001, &quot;新密码不能为空！&quot;);</span>
+	
+	//后台用户修改密码类错误码
+<span class="nc" id="L100">	public static CodeMsg ADMIN_DATABASE_BACKUP_NO_EXIST = new CodeMsg(-8000, &quot;备份记录不存在！&quot;);</span>
+
+	//前台
+<span class="nc" id="L103">	public static CodeMsg ACCOUNT_USERNAME_EXIST = new CodeMsg(-9001, &quot;该用户名已存在，请换一个试试！&quot;);</span>
+<span class="nc" id="L104">	public static CodeMsg ACCOUNT_REGISTER_ERROR = new CodeMsg(-9002, &quot;注册失败，请联系管理员！&quot;);</span>
+<span class="nc" id="L105">	public static CodeMsg ACCOUNT_USERNAME_NO_EXIST = new CodeMsg(-9003, &quot;该用户名不存在！&quot;);</span>
+<span class="nc" id="L106">	public static CodeMsg ACCOUNT_PASSWORD_ERROR = new CodeMsg(-9004, &quot;密码错误！&quot;);</span>
+<span class="nc" id="L107">	public static CodeMsg ACCOUNT_STATUS_ERROR = new CodeMsg(-9005, &quot;账号已被冻结，请联系管理员！&quot;);</span>
+<span class="nc" id="L108">	public static CodeMsg ACCOUNT_HAD_DELETE = new CodeMsg(-9006, &quot;你还不是对方好友，请先发送验证通过后再继续聊天！！&quot;);</span>
+<span class="nc" id="L109">	public static CodeMsg ACCOUNT_NO_FRIEND = new CodeMsg(-9007, &quot;对方不是你的好友，请先添加好友再继续聊天！！&quot;);</span>
+<span class="nc" id="L110">	public static CodeMsg ACCOUNT_NO_ADMIN = new CodeMsg(-9008, &quot;兄弟别闹，这不是你建立的群！&quot;);</span>
+<span class="nc" id="L111">	public static CodeMsg GROUP_ADMIN_NO_DELETE = new CodeMsg(-9009, &quot;管理员不能删除！&quot;);</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.10.202304240956</span></div></body></html>
