@@ -62,9 +62,9 @@ View(Freemarker) ↔ Controller(Spring MVC) ↔ Service(Business Logic) ↔ DAO(
 
 > 部分前端页面使用 FreeMarker + Bootstrap 构建，样式简洁现代。
 
-| 登录页面                                                    | 主聊天页面                                                 | 群管理                                                     |
+| 登录页面                                                    | 主聊天页面                                                 | 后台管理                                                     |
 | ------------------------------------------------------- | ----------------------------------------------------- | ------------------------------------------------------- |
-| ![login](https://www.yuanlrc.com/screenshots/login.png) | ![chat](https://www.yuanlrc.com/screenshots/chat.png) | ![group](https://www.yuanlrc.com/screenshots/group.png) |
+| ![login](https://github.com/poloSnow-0926/SEULink/blob/master/src/main/resources/static/admin/images/login.png) | ![chat](https://github.com/poloSnow-0926/SEULink/blob/master/src/main/resources/static/admin/images/chat.png) | ![group](https://github.com/poloSnow-0926/SEULink/blob/master/src/main/resources/static/admin/images/home_1.png) |
 
 ---
 
